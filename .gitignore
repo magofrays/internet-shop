@@ -13,7 +13,7 @@ secret
 *.iml
 *.ipr
 .idea
-
+*.drawio
 ### Eclipse ###
 .apt_generated
 .classpath
