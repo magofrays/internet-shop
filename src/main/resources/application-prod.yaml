@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: internet-shop
+  datasource:
+    url: jdbc:postgresql://shop-db:5432/shop
+    username: shop
+    password: shop
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.validation: DEBUG
+    by.magofrays: DEBUG
+
+server:
+  port: 8080

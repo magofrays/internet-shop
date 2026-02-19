@@ -3,13 +3,13 @@ volumes:
 
 services:
   shop-db:
-    image: postgres:alpine
+    image: postgres:16-alpine
     environment:
       - 'POSTGRES_DB=shop'
       - 'POSTGRES_PASSWORD=shop'
       - 'POSTGRES_USER=shop'
     ports:
-      - "127.0.0.1:5432:5432"
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -17,9 +17,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      tags: [shop-backend]
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-    image: 'shop-backend'
     ports:
        - "8080:8080"
     depends_on:

@@ -14,6 +14,7 @@ secret
 *.ipr
 .idea
 *.drawio
+*.pdf
 ### Eclipse ###
 .apt_generated
 .classpath
