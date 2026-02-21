@@ -25,5 +25,10 @@ logging:
     org.springframework.validation: DEBUG
     by.magofrays: DEBUG
 
+security:
+  jwt:
+    expires-hours: 10
+    secret: as121mdasn12412sala
+
 server:
   port: 8080

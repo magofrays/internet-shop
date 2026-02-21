@@ -23,5 +23,10 @@ logging:
     org.springframework.security: DEBUG
     by.magofrays: DEBUG
 
+security:
+  jwt:
+    expires-hours: 10
+    secret: asasnfqwj1212msnd
+
 server:
   port: 8080

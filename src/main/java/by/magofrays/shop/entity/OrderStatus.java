@@ -1,4 +1,4 @@
-package entity;
+package by.magofrays.shop.entity;
 
 public enum OrderStatus {
     NEW,                    // только создан

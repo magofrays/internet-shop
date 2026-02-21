@@ -1,4 +1,4 @@
-package entity;
+package by.magofrays.shop.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,4 +38,9 @@ public class Profile {
     @OneToMany
     @Builder.Default
     private List<Item> addedItems = new ArrayList<>();
+
+    public void setCart(Cart cart){
+        this.cart = cart;
+        cart.setProfile(this);
+    }
 }

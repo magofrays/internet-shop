@@ -1,4 +1,4 @@
-package entity;
+package by.magofrays.shop.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
