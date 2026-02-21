@@ -5,11 +5,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -28,6 +27,14 @@ public class User {
     private String lastName;
     private String email;
     private String password;
+    @Column(name = "role_id")
     private Role role;
     private Instant createdAt;
+    @OneToMany
+    @Builder.Default
+    private List<Category> createdCategories = new ArrayList<>();
+
+    @OneToMany
+    @Builder.Default
+    private List<Item> addedItems = new ArrayList<>();
 }

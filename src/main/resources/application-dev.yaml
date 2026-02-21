@@ -13,12 +13,14 @@ spring:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: create
-
+      ddl-auto: validate
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    contexts: dev
 logging:
   level:
     org.springframework.security: DEBUG
-    org.springframework.validation: DEBUG
     by.magofrays: DEBUG
 
 server:
