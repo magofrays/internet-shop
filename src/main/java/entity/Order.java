@@ -5,10 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,18 +16,23 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "orders")
 public class Order {
     @Id
     @GeneratedValue
     private UUID orderId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Profile createdBy;
+
     @OneToMany
     @Builder.Default
     private List<OrderItem> itemList = new ArrayList<>();
 
-    private BigDecimal discountAmount;
+    private BigDecimal discountCost;
     private BigDecimal totalCost;
 
     private OrderStatus orderStatus;
     private String currency;
+
 }

@@ -26,22 +26,22 @@ public class Item {
     private String imageUrl;
     private BigDecimal price;
     private BigDecimal discountPrice;
+    private Long quantity;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    @ManyToMany
-    @JoinTable(
-            name = "supplier_item",
-            joinColumns = @JoinColumn(name = "item_id"),
-            inverseJoinColumns = @JoinColumn(name = "supplier_id")
-    )
-    @Builder.Default
-    private List<Supplier> suppliers = new ArrayList<>();
 
     @ManyToMany(mappedBy = "itemList")
     @Builder.Default
-    private List<Category> categoryList = new ArrayList<>();
+    private List<Category> categories = new ArrayList<>();
 
     @OneToMany(mappedBy = "item")
     @Builder.Default
-    private List<CartItem> cartItems = new ArrayList<>();
+    private List<CartItem> carts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "item")
+    @Builder.Default
+    private List<OrderItem> orders = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Profile addedBy;
 }

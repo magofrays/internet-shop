@@ -16,7 +16,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class User {
+public class Profile {
     @Id
     @GeneratedValue
     private UUID userId;
@@ -30,6 +30,7 @@ public class User {
     @Column(name = "role_id")
     private Role role;
     private Instant createdAt;
+    private Instant updatedAt;
     @OneToMany
     @Builder.Default
     private List<Category> createdCategories = new ArrayList<>();

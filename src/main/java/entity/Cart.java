@@ -21,7 +21,7 @@ public class Cart {
     private UUID cartId;
 
     @OneToOne(mappedBy = "cart")
-    private User user;
+    private Profile profile;
 
     @ManyToMany
     @Builder.Default
