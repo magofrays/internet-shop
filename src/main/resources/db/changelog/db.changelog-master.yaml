@@ -1,3 +1,6 @@
 databaseChangeLog:
   - includeAll: 
       path: classpath:db/1.0/
+  - includeAll:
+      path: classpath:db/test/
+      context: test

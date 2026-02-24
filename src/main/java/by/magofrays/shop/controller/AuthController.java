@@ -25,7 +25,7 @@ import java.time.Instant;
 public class AuthController {
 
     private final AuthService authService;
-    private final JwtUtils jwtUtils;
+
     private final AuthenticationManager authenticationManager;
 
     @PostMapping("/sign-in")
@@ -35,25 +35,18 @@ public class AuthController {
         );
         SecurityContextHolder.getContext().setAuthentication(auth);
         UserDetails details = (UserDetails) auth.getPrincipal();
-        return createLoginResponse(details);
+        return authService.createLoginResponse(details);
     }
 
     @PostMapping("/sign-up")
     public LoginResponse signUp(@RequestBody @Validated CreateUpdateProfileDto createProfileDto){
-        return createLoginResponse(
+        return authService.createLoginResponse(
                 authService
                         .createProfile(createProfileDto)
         );
     }
 
-    private LoginResponse createLoginResponse(UserDetails details){
-        String token = jwtUtils.createJwt(details);
-        Instant expiresAt = jwtUtils.parseToken(token).get().getBody().getExpiration().toInstant();
-        return LoginResponse.builder()
-                .token(token)
-                .expiresAt(expiresAt)
-                .build();
-    }
+
 
 
 }

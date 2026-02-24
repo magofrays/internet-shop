@@ -3,10 +3,10 @@ spring:
     name: internet-shop
 
   datasource:
-    url: jdbc:hsqldb:mem:myDb
+    url: jdbc:postgresql://shop-db:5432/shop
     username: shop
     password: shop
-    driver-class-name: org.hsqldb.jdbc.JDBCDriver
+    driver-class-name: org.postgresql.Driver
     hikari:
       connection-timeout: 30000
       maximum-pool-size: 20
@@ -16,16 +16,16 @@ spring:
     properties:
       hibernate:
         format_sql: false
-        dialect: org.hibernate.dialect.H2Dialect
+        dialect: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: validate
       naming:
         implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl
 
-#  liquibase:
-#    enabled: true
-#    change-log: classpath:db/changelog/db.changelog-master.yaml
-#    contexts: dev
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    contexts: dev
 
 logging:
   level:

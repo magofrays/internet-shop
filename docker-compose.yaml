@@ -17,7 +17,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      tags: [shop-backend]
+    image: shop-backend:latest
     environment:
       - SPRING_PROFILES_ACTIVE=prod
     ports:

@@ -1,11 +1,13 @@
 package by.magofrays.shop.service;
 
+import by.magofrays.shop.configuration.security.JwtUtils;
 import by.magofrays.shop.dto.CreateUpdateProfileDto;
-import by.magofrays.shop.dto.ReadProfileDto;
+import by.magofrays.shop.dto.LoginResponse;
 import by.magofrays.shop.entity.Cart;
 import by.magofrays.shop.entity.Profile;
 import by.magofrays.shop.entity.Role;
 import by.magofrays.shop.exception.BusinessException;
+import by.magofrays.shop.repository.CartRepository;
 import by.magofrays.shop.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -15,10 +17,11 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
+import java.time.Instant;
 import java.util.Collections;
 
 @Service
@@ -26,6 +29,8 @@ import java.util.Collections;
 public class AuthService implements UserDetailsService {
     private final ProfileRepository profileRepository;
     private final ModelMapper modelMapper;
+    private final BCryptPasswordEncoder passwordEncoder;
+    private final JwtUtils jwtUtils;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -39,12 +44,23 @@ public class AuthService implements UserDetailsService {
                 );
     }
 
-
+    public LoginResponse createLoginResponse(UserDetails details){
+        String token = jwtUtils.createJwt(details);
+        Instant expiresAt = jwtUtils.parseToken(token).get().getBody().getExpiration().toInstant();
+        return LoginResponse.builder()
+                .token(token)
+                .expiresAt(expiresAt)
+                .build();
+    }
 
     @Transactional
     public UserDetails createProfile(CreateUpdateProfileDto createProfileDto){
+        if(profileRepository.findByEmail(createProfileDto.getEmail()).isPresent()){
+            throw new BusinessException(HttpStatus.BAD_REQUEST);
+        }
         Profile profile = modelMapper.map(createProfileDto, Profile.class);
         profile.setRole(Role.CLIENT);
+        profile.setPassword(passwordEncoder.encode(createProfileDto.getPassword()));
         Cart cart = new Cart();
         profile.setCart(cart);
         profileRepository.save(profile);
