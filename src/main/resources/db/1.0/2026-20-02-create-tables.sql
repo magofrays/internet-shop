@@ -4,7 +4,7 @@
 
 create table profile
 (
-    profile_id uuid primary key DEFAULT gen_random_uuid(),
+    id uuid primary key DEFAULT gen_random_uuid(),
     first_name varchar(128) not null,
     last_name varchar(128) not null,
     email varchar(128) not null unique,
@@ -15,7 +15,7 @@ create table profile
 );
 
 create table item(
-    item_id uuid primary key DEFAULT gen_random_uuid(),
+    id uuid primary key DEFAULT gen_random_uuid(),
     title varchar(128) not null unique,
     description text,
     image_url varchar(255),
@@ -24,35 +24,40 @@ create table item(
     quantity bigint not null default 1,
     created_at timestamptz not null default current_timestamp,
     updated_at timestamptz not null default current_timestamp,
-    added_by uuid not null references profile(profile_id)
+    added_by_id uuid not null references profile(id)
 );
 
 create table category(
-    category_id uuid primary key DEFAULT gen_random_uuid(),
+    id uuid primary key DEFAULT gen_random_uuid(),
     title varchar(128) not null,
     description text,
-    parent_catalogue uuid references category(category_id), --if null means root dir
+    parent_catalogue_id uuid references category(id), --if null means root dir
     created_at timestamptz not null default current_timestamp,
     updated_at timestamptz not null default current_timestamp,
-    created_by uuid not null references profile(profile_id)
+    created_by_id uuid not null references profile(id)
+);
+
+create table category_item(
+    category_id uuid references category(id),
+    item_id uuid references item(id)
 );
 
 create table cart(
-    cart_id uuid primary key DEFAULT gen_random_uuid(),
-    profile_id uuid not null references profile(profile_id) unique
+    id uuid primary key DEFAULT gen_random_uuid(),
+    profile_id uuid not null references profile(id) unique
     -- more information to save
 );
 
 create table cart_item(
-    cart_item_id uuid primary key default gen_random_uuid(),
-    cart_id uuid not null references cart(cart_id),
-    item_id uuid not null references item(item_id),
+    id uuid primary key default gen_random_uuid(),
+    cart_id uuid not null references cart(id),
+    item_id uuid not null references item(id),
     added_at timestamptz not null default current_timestamp
 );
 
 create table orders(
-    order_id uuid primary key default gen_random_uuid(),
-    created_by uuid references profile(profile_id),
+    id uuid primary key default gen_random_uuid(),
+    created_by_id uuid references profile(id),
     discount_cost decimal(10, 2),
     total_cost decimal(10, 2) not null,
     order_status int not null,
@@ -62,8 +67,9 @@ create table orders(
 );
 
 create table order_item(
-    order_item_id uuid primary key default gen_random_uuid(),
-    order_id uuid not null references orders(order_id),
+    id uuid primary key default gen_random_uuid(),
+    order_id uuid not null references orders(id),
+    item_id uuid not null references item(id),
     cost decimal(10, 2) not null,
     discount_cost decimal(10, 2),
     created_at timestamptz not null default current_timestamp

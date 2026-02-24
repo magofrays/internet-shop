@@ -20,7 +20,7 @@ import java.util.UUID;
 public class Item {
     @Id
     @GeneratedValue
-    private UUID itemId;
+    private UUID id;
     private String title;
     private String description;
     private String imageUrl;

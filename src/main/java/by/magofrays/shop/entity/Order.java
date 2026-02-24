@@ -20,12 +20,12 @@ import java.util.UUID;
 public class Order {
     @Id
     @GeneratedValue
-    private UUID orderId;
+    private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Profile createdBy;
 
-    @OneToMany
+    @OneToMany(mappedBy = "order")
     @Builder.Default
     private List<OrderItem> itemList = new ArrayList<>();
 

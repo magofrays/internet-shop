@@ -14,6 +14,8 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: validate
+      naming:
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl
   liquibase:
     enabled: true
     change-log: classpath:db/changelog/db.changelog-master.yaml

@@ -18,12 +18,12 @@ import java.util.UUID;
 public class Cart {
     @Id
     @GeneratedValue
-    private UUID cartId;
+    private UUID id;
 
-    @OneToOne(mappedBy = "cart")
+    @OneToOne
     private Profile profile;
 
-    @ManyToMany
+    @OneToMany(mappedBy = "cart")
     @Builder.Default
-    private List<Item> itemList = new ArrayList<>();
+    private List<CartItem> itemList = new ArrayList<>();
 }

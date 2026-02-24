@@ -19,9 +19,9 @@ import java.util.UUID;
 public class Profile {
     @Id
     @GeneratedValue
-    private UUID userId;
+    private UUID id;
 
-    @OneToOne(mappedBy = "user")
+    @OneToOne(mappedBy = "profile")
     private Cart cart;
     private String firstName;
     private String lastName;
@@ -31,11 +31,11 @@ public class Profile {
     private Role role;
     private Instant createdAt;
     private Instant updatedAt;
-    @OneToMany
+    @OneToMany(mappedBy = "createdBy")
     @Builder.Default
     private List<Category> createdCategories = new ArrayList<>();
 
-    @OneToMany
+    @OneToMany(mappedBy = "addedBy")
     @Builder.Default
     private List<Item> addedItems = new ArrayList<>();
 

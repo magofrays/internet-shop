@@ -18,7 +18,8 @@ import java.util.UUID;
 @NoArgsConstructor
 public class Category {
     @Id
-    private UUID categoryId;
+    @GeneratedValue
+    private UUID id;
     private String title;
     private String description;
 

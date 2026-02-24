@@ -9,10 +9,11 @@ import java.util.UUID;
 
 @Data
 @Entity
+@Table(name = "order_item")
 public class OrderItem {
     @Id
     @GeneratedValue
-    private UUID orderItemId;
+    private UUID id;
 
     @ManyToOne
     private Item item;
