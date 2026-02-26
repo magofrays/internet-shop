@@ -12,7 +12,6 @@ import java.util.UUID;
 @Builder
 public class CartItemDto {
     private UUID id;
-    private UUID cartId;
     private ItemDto item;
     private Instant addedAt;
 }

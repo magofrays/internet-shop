@@ -28,15 +28,15 @@ spring:
     default-schema: public
     contexts: test
 
-logging:
-  level:
-    org.springframework.security: DEBUG
-    by.magofrays: DEBUG
+#logging:
+#  level:
+#    org.springframework.security: DEBUG
+#    by.magofrays: DEBUG
 
 security:
   jwt:
     expires-hours: 10
-    secret: asasnfqwj1212msnd
+    secret: supersecretsossecretsecretsecretASAWQWASASFNANNnsnasnannwqw1214w
 
 server:
   port: 8080

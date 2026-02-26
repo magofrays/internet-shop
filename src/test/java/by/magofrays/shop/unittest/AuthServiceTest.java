@@ -9,6 +9,7 @@ import by.magofrays.shop.entity.Cart;
 import by.magofrays.shop.entity.Profile;
 import by.magofrays.shop.entity.Role;
 import by.magofrays.shop.exception.BusinessException;
+import by.magofrays.shop.mapper.ProfileMapperImpl;
 import by.magofrays.shop.repository.ProfileRepository;
 import by.magofrays.shop.service.AuthService;
 import io.jsonwebtoken.Claims;
@@ -18,7 +19,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -26,7 +26,6 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.Instant;
@@ -41,19 +40,17 @@ import static org.mockito.Mockito.verify;
 @ContextConfiguration(
         classes = {
                 AuthService.class,
-                ModelMapper.class,
+                ProfileMapperImpl.class,
                 BCryptPasswordEncoder.class,
-                SecurityJwtProperties.class,
                 JwtUtils.class
         }
 )
-@TestPropertySource(properties = {
-        "security.jwt.expires-hours=24",
-        "security.jwt.secret=VGhpcyBpcyBhIHZlcnkgc2VjdXJlIGtleSBmb3IgSldUIHNpZ25pbmcgdGhhdCBpcyBsb25nIGVub3VnaCB0byBiZSBzZWN1cmU="
-})
 public class AuthServiceTest {
     @MockBean
     private ProfileRepository profileRepository;
+
+    @MockBean
+    private SecurityJwtProperties securityJwtProperties;
 
     @Autowired
     private AuthService authService;
@@ -160,6 +157,9 @@ public class AuthServiceTest {
                         new SimpleGrantedAuthority(Role.CLIENT.name())
                 )
         );
+        String key = "supersecretsossecretsecretsecretASAWQWASASFNANNnsnasnannwqw1214w";
+        Mockito.when(securityJwtProperties.getSecret()).thenReturn(key);
+        Mockito.when(securityJwtProperties.getExpiresHours()).thenReturn(10);
         LoginResponse loginResponse = authService.createLoginResponse(userDetails);
         Assertions.assertNotNull(loginResponse, "authService.createLoginResponse() returned null");
         Assertions.assertTrue(loginResponse.getExpiresAt().isAfter(Instant.now()));

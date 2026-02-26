@@ -27,16 +27,16 @@ spring:
     change-log: classpath:db/changelog/db.changelog-master.yaml
     contexts: dev
 
-logging:
-  level:
-    org.springframework.security: DEBUG
-    org.springframework.validation: DEBUG
-    by.magofrays: DEBUG
+#logging:
+#  level:
+#    org.springframework.security: DEBUG
+#    org.springframework.validation: DEBUG
+#    by.magofrays: DEBUG
 
 security:
   jwt:
     expires-hours: 10
-    secret: as121mdasn12412sala
+    secret: supersecretsossecretsecretsecretASAWQWASASFNANNnsnasnannwqw1214w
 
 server:
   port: 8080

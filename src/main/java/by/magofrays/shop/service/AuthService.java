@@ -7,10 +7,9 @@ import by.magofrays.shop.entity.Cart;
 import by.magofrays.shop.entity.Profile;
 import by.magofrays.shop.entity.Role;
 import by.magofrays.shop.exception.BusinessException;
-import by.magofrays.shop.repository.CartRepository;
+import by.magofrays.shop.mapper.ProfileMapper;
 import by.magofrays.shop.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -28,8 +27,8 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class AuthService implements UserDetailsService {
     private final ProfileRepository profileRepository;
-    private final ModelMapper modelMapper;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final ProfileMapper profileMapper;
     private final JwtUtils jwtUtils;
 
     @Override
@@ -58,7 +57,7 @@ public class AuthService implements UserDetailsService {
         if(profileRepository.findByEmail(createProfileDto.getEmail()).isPresent()){
             throw new BusinessException(HttpStatus.BAD_REQUEST);
         }
-        Profile profile = modelMapper.map(createProfileDto, Profile.class);
+        Profile profile = profileMapper.toEntity(createProfileDto);
         profile.setRole(Role.CLIENT);
         profile.setPassword(passwordEncoder.encode(createProfileDto.getPassword()));
         Cart cart = new Cart();

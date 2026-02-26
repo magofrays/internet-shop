@@ -12,7 +12,6 @@ secret
 *.iws
 *.iml
 *.ipr
-.idea
 *.drawio
 ### Eclipse ###
 .apt_generated

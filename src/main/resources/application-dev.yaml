@@ -10,7 +10,9 @@ spring:
     hikari:
       connection-timeout: 30000
       maximum-pool-size: 20
-
+  servlet:
+    multipart:
+      max-request-size=10MB:
   jpa:
     show-sql: true
     properties:
@@ -35,7 +37,7 @@ logging:
 security:
   jwt:
     expires-hours: 10
-    secret: asasnfqwj1212msnd
+    secret: supersecretsossecretsecretsecretASAWQWASASFNANNnsnasnannwqw1214w
 
 server:
   port: 8080

@@ -7,6 +7,6 @@ import java.util.UUID;
 @Data
 public class CategoryDto {
     private UUID id;
-    private String name;
+    private String title;
     private String description;
 }

@@ -24,6 +24,7 @@ public class Category {
     private String description;
 
     @OneToMany(mappedBy = "parentCatalogue")
+    @Builder.Default
     private List<Category> categoryList = new ArrayList<>();
     @ManyToOne(fetch = FetchType.LAZY)
     private Category parentCatalogue;

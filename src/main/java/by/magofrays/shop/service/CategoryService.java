@@ -4,9 +4,9 @@ import by.magofrays.shop.dto.CategoryDto;
 import by.magofrays.shop.dto.FullCategoryDto;
 import by.magofrays.shop.entity.Category;
 import by.magofrays.shop.exception.BusinessException;
+import by.magofrays.shop.mapper.CategoryMapper;
 import by.magofrays.shop.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -18,13 +18,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CategoryService {
     private final CategoryRepository categoryRepository;
-    private final ModelMapper modelMapper;
+    private final CategoryMapper categoryMapper;
 
     public List<CategoryDto> getRootCatalogues(){
         return categoryRepository
                 .getCategoriesByParentCatalogue(null).stream()
-                .map(category ->
-                        modelMapper.map(category, CategoryDto.class))
+                .map(categoryMapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -32,7 +31,7 @@ public class CategoryService {
         Category catalogue = categoryRepository.findById(catalogueId).orElseThrow(
                 () -> new BusinessException(HttpStatus.NOT_FOUND)
         );
-        return modelMapper.map(catalogue, FullCategoryDto.class);
+        return categoryMapper.toFullDto(catalogue);
     }
 
     public List<CategoryDto> getCategoriesByParentCategory(UUID categoryId){
@@ -41,10 +40,11 @@ public class CategoryService {
                         () -> new BusinessException(HttpStatus.NOT_FOUND)
                 );
         return category.getCategoryList().stream()
-                .map(
-                        category1 -> modelMapper.map(category1, CategoryDto.class)
-                ).collect(Collectors.toList());
+                .map(categoryMapper::toDto)
+                .collect(Collectors.toList());
     }
+
+
 
 
 }

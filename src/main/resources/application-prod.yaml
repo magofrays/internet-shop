@@ -36,7 +36,7 @@ logging:
 security:
   jwt:
     expires-hours: 10
-    secret: as121mdasn12412sala
+    secret: supersecretsossecretsecretsecretASAWQWASASFNANNnsnasnannwqw1214w
 
 server:
   port: 8080
