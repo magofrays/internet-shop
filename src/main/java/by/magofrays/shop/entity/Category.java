@@ -40,6 +40,13 @@ public class Category {
     private Instant createdAt;
     private Instant updatedAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Profile createdBy;
+    public void addChildCatalogue(Category category){
+        categoryList.add(category);
+        category.setParentCatalogue(this);
+    }
+
+    public void addItem(Item item){
+        itemList.add(item);
+        item.getCategories().add(this);
+    }
 }

@@ -22,11 +22,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfiguration {
     private final JwtAuthFilter jwtAuthFilter;
     private final AuthService authService;
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+    private final PasswordEncoder passwordEncoder;
 
     @Bean
     @SneakyThrows
@@ -52,7 +48,7 @@ public class SecurityConfiguration {
     public AuthenticationManager authenticationManager(HttpSecurity http){
         AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
         builder.userDetailsService(authService)
-                .passwordEncoder(passwordEncoder());
+                .passwordEncoder(passwordEncoder);
         return builder.build();
     }
 }

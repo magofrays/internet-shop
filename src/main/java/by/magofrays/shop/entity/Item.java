@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +28,8 @@ public class Item {
     private BigDecimal price;
     private BigDecimal discountPrice;
     private Long quantity;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private Instant createdAt;
+    private Instant updatedAt;
 
     @ManyToMany(mappedBy = "itemList")
     @Builder.Default
@@ -41,7 +42,4 @@ public class Item {
     @OneToMany(mappedBy = "item")
     @Builder.Default
     private List<OrderItem> orders = new ArrayList<>();
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Profile addedBy;
 }

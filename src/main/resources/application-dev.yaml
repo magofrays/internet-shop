@@ -10,15 +10,19 @@ spring:
     hikari:
       connection-timeout: 30000
       maximum-pool-size: 20
+
   servlet:
     multipart:
-      max-request-size=10MB:
+      location: /tmp
+      max-file-size: 5MB
+      max-request-size: 10MB
+
   jpa:
     show-sql: true
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.H2Dialect
+        dialect: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: validate
       naming:
@@ -28,11 +32,16 @@ spring:
     enabled: true
     change-log: classpath:db/changelog/db.changelog-master.yaml
     default-schema: public
+    contexts: dev
 
 logging:
   level:
     org.springframework.security: DEBUG
     by.magofrays: DEBUG
+
+file:
+  upload:
+    allowed-extensions: jpg,jpeg,png,gif,webp
 
 security:
   jwt:
