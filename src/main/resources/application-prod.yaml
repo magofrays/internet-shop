@@ -3,7 +3,7 @@ spring:
     name: internet-shop
 
   datasource:
-    url: jdbc:hsqldb:mem:myDb
+    url: jdbc:postgresql://shop-db:5432/shop
     username: shop
     password: shop
     driver-class-name: org.postgresql.Driver
@@ -11,27 +11,37 @@ spring:
       connection-timeout: 30000
       maximum-pool-size: 20
 
+  servlet:
+    multipart:
+      location: /tmp
+      max-file-size: 5MB
+      max-request-size: 10MB
+
   jpa:
-    show-sql: false
+    show-sql: true
     properties:
       hibernate:
-        format_sql: false
+        format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: validate
       naming:
-        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
 
-#  liquibase:
-#    enabled: true
-#    change-log: classpath:db/changelog/db.changelog-master.yaml
-#    contexts: dev
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    default-schema: public
+    contexts: dev
 
 logging:
   level:
     org.springframework.security: DEBUG
-    org.springframework.validation: DEBUG
     by.magofrays: DEBUG
+
+file:
+  upload:
+    allowed-extensions: jpg,jpeg,png,gif,webp
 
 security:
   jwt:

@@ -31,13 +31,6 @@ public class Profile {
     private Role role;
     private Instant createdAt;
     private Instant updatedAt;
-    @OneToMany(mappedBy = "createdBy")
-    @Builder.Default
-    private List<Category> createdCategories = new ArrayList<>();
-
-    @OneToMany(mappedBy = "addedBy")
-    @Builder.Default
-    private List<Item> addedItems = new ArrayList<>();
 
     public void setCart(Cart cart){
         this.cart = cart;

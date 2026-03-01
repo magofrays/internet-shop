@@ -23,8 +23,7 @@ create table item(
     discount_price decimal(10, 2),
     quantity bigint not null default 1,
     created_at timestamptz not null default current_timestamp,
-    updated_at timestamptz not null default current_timestamp,
-    added_by_id uuid not null references profile(id)
+    updated_at timestamptz not null default current_timestamp
 );
 
 create table category(
@@ -33,8 +32,7 @@ create table category(
     description text,
     parent_catalogue_id uuid references category(id), --if null means root dir
     created_at timestamptz not null default current_timestamp,
-    updated_at timestamptz not null default current_timestamp,
-    created_by_id uuid not null references profile(id)
+    updated_at timestamptz not null default current_timestamp
 );
 
 create table category_item(
@@ -57,13 +55,13 @@ create table cart_item(
 
 create table orders(
     id uuid primary key default gen_random_uuid(),
-    created_by_id uuid references profile(id),
     discount_cost decimal(10, 2),
     total_cost decimal(10, 2) not null,
     order_status int not null,
     currency varchar(8),
     created_at timestamptz not null default current_timestamp,
-    updated_at timestamptz not null default current_timestamp
+    updated_at timestamptz not null default current_timestamp,
+    created_by_id uuid references profile(id)
 );
 
 create table order_item(
