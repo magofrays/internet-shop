@@ -25,3 +25,18 @@ services:
     depends_on:
       - shop-db
 
+  smtp:
+    image: boky/postfix
+    container_name: smtp-server
+    restart: unless-stopped
+    ports:
+      - "25:25"
+    environment:
+      - SMTP_SERVER_HOSTNAME=localhost
+      - SMTP_SERVER_DOMAIN=shop.ru
+      - RELAY_NETWORKS=0.0.0.0/0
+      - POSTFIX_mailbox_command=/bin/cat
+      - ALLOWED_SENDER_DOMAINS=shop.ru
+      - LOG_TO_STDOUT=1
+    hostname: mail
+

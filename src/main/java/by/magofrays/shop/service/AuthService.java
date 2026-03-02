@@ -10,6 +10,7 @@ import by.magofrays.shop.exception.BusinessException;
 import by.magofrays.shop.mapper.ProfileMapper;
 import by.magofrays.shop.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -23,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.Collections;
 
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService implements UserDetailsService {
@@ -33,6 +36,7 @@ public class AuthService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        log.info("Trying to find profile by email: {}", email);
         return profileRepository.findByEmail(email).map(profile ->
                 new User(
                         profile.getEmail(),
@@ -44,6 +48,7 @@ public class AuthService implements UserDetailsService {
     }
 
     public LoginResponse createLoginResponse(UserDetails details){
+        log.info("Creating login response for profile: {}", details.getUsername());
         String token = jwtUtils.createJwt(details);
         Instant expiresAt = jwtUtils.parseToken(token).get().getBody().getExpiration().toInstant();
         return LoginResponse.builder()
@@ -54,7 +59,9 @@ public class AuthService implements UserDetailsService {
 
     @Transactional
     public UserDetails createProfile(CreateUpdateProfileDto createProfileDto){
+        log.info("Trying to create profile: {}", createProfileDto.getEmail());
         if(profileRepository.findByEmail(createProfileDto.getEmail()).isPresent()){
+            log.error("Email {} already taken to create profile", createProfileDto.getEmail());
             throw new BusinessException(HttpStatus.BAD_REQUEST);
         }
         Profile profile = profileMapper.toEntity(createProfileDto);
@@ -63,6 +70,7 @@ public class AuthService implements UserDetailsService {
         Cart cart = new Cart();
         profile.setCart(cart);
         profileRepository.save(profile);
+        log.info("Created profile: {}", profile.getId());
         return new User(profile.getEmail(), "",
                 Collections.singletonList( new SimpleGrantedAuthority(profile.getRole().name())));
     }

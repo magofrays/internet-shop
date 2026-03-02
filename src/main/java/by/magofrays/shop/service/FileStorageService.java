@@ -12,6 +12,7 @@ import org.springframework.util.unit.DataSize;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -25,63 +26,98 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class FileStorageService {
 
     private final Path baseUploadPath;
+    private final Path baseSavePath;
     private final HashSet<String> allowedExtensions;
     @Value("${spring.servlet.multipart.max-file-size}")
     private DataSize maxFileSize;
     private final AtomicInteger counter = new AtomicInteger(0);
     private final ConcurrentHashMap<UUID, Object> fileLocks = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<UUID, String> itemImagesPath = new ConcurrentHashMap<>();
 
     @SneakyThrows
     public FileStorageService(@Value("${spring.servlet.multipart.location}") String baseLocation,
                               @Value("${file.upload.allowed-extensions}") String[] extensions){
         baseUploadPath = Paths.get(baseLocation, "upload").toAbsolutePath().normalize();
+        baseSavePath = Paths.get(baseLocation, "save").toAbsolutePath().normalize();
         allowedExtensions = new HashSet<>(Arrays.asList(extensions));
         Files.createDirectories(baseUploadPath);
-        Files.createDirectories(baseUploadPath.resolve("images/items"));
+    }
 
+    private void createDir(String url){
+        Path fullPath = baseUploadPath.resolve(url);
+        if(Files.exists(fullPath)){
+            return;
+        }
+        try{
+            Files.createDirectories(fullPath);
+        } catch (IOException ignored){
+        }
+    }
+
+    @SneakyThrows
+    public String saveFile(Resource file, String url, UUID entityId, String oldPath){
+        log.debug("Trying to save file for entity: {}", entityId);
+        String start = url.substring(url.lastIndexOf("/") + 1);
+        createDir(url);
+        Object fileLock = fileLocks.computeIfAbsent(entityId, k -> new Object());
+        synchronized (fileLock){
+            String newFileName = generateFileName(entityId, file.getFilename(), start);
+            if(oldPath != null){
+                Path pathToDelete = baseSavePath.resolve(oldPath);
+                deleteFile(pathToDelete);
+            }
+            Path targetPath = baseSavePath.resolve(url).resolve(newFileName);
+            Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+            log.info("File saved: {}. For entity: {}", targetPath, entityId);
+            return url + "/" + newFileName;
+        }
     }
 
 
     @SneakyThrows
-    public String saveItemImage(MultipartFile image, UUID itemId){
-        validateImageFile(image);
-        Object fileLock = fileLocks.computeIfAbsent(itemId, k -> new Object());
+    public String uploadFile(MultipartFile file, String url, UUID entityId, String oldPath){
+        log.debug("Trying to upload file for entity: {}", entityId);
+        String start = url.substring(url.lastIndexOf("/") + 1);
+        createDir(url);
+        Object fileLock = fileLocks.computeIfAbsent(entityId, k -> new Object());
         synchronized (fileLock){
-            String newFileName = generateFileName(itemId, image, "item");
-            String oldPath = itemImagesPath.get(itemId);
+            String newFileName = generateFileName(entityId, file.getOriginalFilename(), start);
             if(oldPath != null){
-                deleteFile(oldPath);
+                Path pathToDelete = baseUploadPath.resolve(oldPath);
+                deleteFile(pathToDelete);
             }
-            itemImagesPath.put(itemId, "images/items/" + newFileName);
-            Path targetPath = baseUploadPath.resolve("images/items").resolve(newFileName);
-            Files.copy(image.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
-            log.debug("Image saved: {}", targetPath);
-            return "images/items/" + newFileName;
+            Path targetPath = baseUploadPath.resolve(url).resolve(newFileName);
+            Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+            log.info("File uploaded: {}. For entity: {}", targetPath, entityId);
+            return url + "/" + newFileName;
         }
     }
 
-    public void deleteItemImage(UUID itemId){
-        Object fileLock = fileLocks.computeIfAbsent(itemId, k -> new Object());
+    public void deleteFileForEntity(String url, UUID entityId){
+        log.info("Trying to delete file: {} for entity: {}", url, entityId);
+        Object fileLock = fileLocks.computeIfAbsent(entityId, k -> new Object());
+        if(url == null){
+            throw new BusinessException(HttpStatus.BAD_REQUEST);
+        }
+        Path path = baseUploadPath.resolve(url);
         synchronized (fileLock){
-            String path = itemImagesPath.get(itemId);
-            if(path == null){
+            if(!Files.exists(path)){
+                log.warn("No file found for path {} for entity {}", path, entityId);
                 throw new BusinessException(HttpStatus.NOT_FOUND);
             }
-            itemImagesPath.remove(itemId);
             deleteFile(path);
         }
     }
 
     @SneakyThrows
-    private void deleteFile(String path){
+    private void deleteFile(Path path){
         log.info("Deleting image: {}", path);
         Path filePath = baseUploadPath.resolve(path);
         Files.delete(filePath);
     }
 
-    private String generateFileName(UUID id, MultipartFile file, String start){
-        String extension = getFileExtension(Objects.requireNonNull(file.getOriginalFilename()));
+    private String generateFileName(UUID id, String filename, String start){
+        log.debug("Generating filename for image for entity {} with id {}", start, id);
+        String extension = getFileExtension(filename);
         int unique = counter.getAndIncrement();
         return start + String.format("-%s-%d-%d.%s",
                 id.toString(),
@@ -93,22 +129,27 @@ public class FileStorageService {
 
     public void validateImageFile(MultipartFile file) {
         if (file.isEmpty()) {
+            log.warn("File is empty to save image.");
             throw new BusinessException(HttpStatus.BAD_REQUEST);
         }
 
         if (file.getSize() > maxFileSize.toBytes()) {
+            log.warn("File is too big to save image.");
             throw new BusinessException(HttpStatus.BAD_REQUEST);
         }
 
         String contentType = file.getContentType();
         if (contentType == null || !contentType.startsWith("image/")) {
+            log.warn("File is not image.");
             throw new BusinessException(HttpStatus.BAD_REQUEST);
         }
         if(file.getOriginalFilename() == null){
+            log.warn("No file name.");
             throw new BusinessException(HttpStatus.BAD_REQUEST);
         }
         String extension = getFileExtension(file.getOriginalFilename());
         if (!allowedExtensions.contains(extension.toLowerCase())) {
+            log.warn("Bad file extension. Probably not image.");
             throw new BusinessException(
                     HttpStatus.BAD_REQUEST
             );
@@ -121,9 +162,23 @@ public class FileStorageService {
                 .toLowerCase();
     }
 
-    public Resource getImageByPath(String imagePath){
-        File file = baseUploadPath.resolve(imagePath).toFile();
-        return new FileSystemResource(file);
+    public Resource getFileByPath(String path){
+        log.info("Trying to get file by path: {}", path);
+        if(path == null){
+            log.error("Path is empty");
+            throw new BusinessException(HttpStatus.BAD_REQUEST);
+        }
+
+        Path uploadPath = baseUploadPath.resolve(path);
+        if(Files.exists(uploadPath)){
+            return new FileSystemResource(uploadPath.toFile());
+        }
+        Path savePath = baseSavePath.resolve(path);
+        if(Files.exists(savePath)){
+            return new FileSystemResource(savePath.toFile());
+        }
+        log.error("Path {} is wrong", path);
+        throw new BusinessException(HttpStatus.NOT_FOUND);
     }
 
 }

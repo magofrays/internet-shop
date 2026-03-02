@@ -54,15 +54,15 @@ public class FileStorageServiceTest {
 
         MultipartFile image = createMockImage();
         byte[] imageContent = image.getBytes();
-        String savedPath = fileStorageService.saveItemImage(image, itemId);
+        String savedPath = fileStorageService.saveFile(image, "images/item", itemId, null);
         assertNotNull(savedPath);
-        assertTrue(savedPath.startsWith("images/items/item-"));
+        assertTrue(savedPath.startsWith("images/item/item-"));
         assertTrue(savedPath.endsWith(".jpg"));
-        Path expectedFilePath = tempDir.resolve("upload/images/items")
-                .resolve(savedPath.substring("images/items/".length()));
+        Path expectedFilePath = tempDir.resolve("upload/images/item")
+                .resolve(savedPath.substring("images/item/".length()));
         assertTrue(Files.exists(expectedFilePath));
         assertArrayEquals(imageContent, Files.readAllBytes(expectedFilePath));
-        fileStorageService.deleteItemImage(itemId);
+        fileStorageService.deleteFileForEntity(savedPath, itemId);
         assertFalse(Files.exists(expectedFilePath));
     }
 
@@ -99,8 +99,8 @@ public class FileStorageServiceTest {
 
         MultipartFile newImage = createMockImage();
         byte[] imageContent = newImage.getBytes();
-        String oldImagePath = fileStorageService.saveItemImage(image, itemId);
-        String newImagePath = fileStorageService.saveItemImage(newImage, itemId);
+        String oldImagePath = fileStorageService.saveFile(image, "images/item", itemId, null);
+        String newImagePath = fileStorageService.saveFile(newImage, "images/item", itemId, oldImagePath);
         Path oldPath = tempDir.resolve("upload/").resolve(oldImagePath);
         Path newPath = tempDir.resolve("upload/").resolve(newImagePath);
         assertTrue(Files.exists(newPath));
@@ -122,8 +122,8 @@ public class FileStorageServiceTest {
     @SneakyThrows
     public void saveAndLoadImageTest(){
         MultipartFile file = createMockImage();
-        String url = fileStorageService.saveItemImage(file, itemId);
-        Resource img = fileStorageService.getImageByPath(url);
+        String url = fileStorageService.saveFile(file, "images/item", itemId, null);
+        Resource img = fileStorageService.getFileByPath(url);
         byte[] loadedBytes;
         try (InputStream is = img.getInputStream();
              ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {

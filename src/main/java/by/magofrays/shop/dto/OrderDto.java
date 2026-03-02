@@ -22,7 +22,7 @@ public class OrderDto {
 
     private UUID id;
 
-    private Profile createdBy;
+    private ReadProfileDto createdBy;
 
     @Builder.Default
     private List<OrderItemDto> itemList = new ArrayList<>();

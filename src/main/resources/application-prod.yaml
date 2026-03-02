@@ -34,6 +34,16 @@ spring:
     default-schema: public
     contexts: dev
 
+  mail:
+    host: smtp.shop.ru
+    port: 25 # postfix
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+    from-address: noreply@shop.ru
 logging:
   level:
     org.springframework.security: DEBUG

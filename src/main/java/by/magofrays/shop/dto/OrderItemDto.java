@@ -17,8 +17,7 @@ import java.util.UUID;
 @Builder
 public class OrderItemDto {
     private UUID id;
-    private Item item;
-    private Order order;
+    private ItemDto item;
     private BigDecimal cost;
     private BigDecimal discountCost;
     private Instant createdAt;

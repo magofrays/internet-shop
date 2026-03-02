@@ -34,6 +34,20 @@ spring:
     default-schema: public
     contexts: dev
 
+  mail:
+    host: localhost
+    port: 1025 # mailHog
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+    from-address: noreply@shop.ru
+
+receipt:
+  template: payment-receipt
+
 logging:
   level:
     org.springframework.security: DEBUG

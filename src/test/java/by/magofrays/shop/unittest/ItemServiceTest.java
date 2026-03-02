@@ -56,7 +56,7 @@ public class ItemServiceTest {
     public void setUp() {
         Mockito.reset(itemRepository, fileStorageService);
 
-        when(fileStorageService.saveItemImage(any(MultipartFile.class), any(UUID.class)))
+        when(fileStorageService.saveFile(any(MultipartFile.class), any(String.class), any(UUID.class), any()))
                 .thenReturn(imageUrl);
 
         existingItemId = UUID.randomUUID();
@@ -152,7 +152,7 @@ public class ItemServiceTest {
 
         verify(itemRepository, times(1)).findById(existingItemId);
         verify(itemRepository, times(1)).save(any(Item.class));
-        verify(fileStorageService, never()).saveItemImage(any(), any());
+        verify(fileStorageService, never()).saveFile(any(), any(), any(), any());
     }
 
     @Test
@@ -174,7 +174,8 @@ public class ItemServiceTest {
 
         verify(itemRepository, times(1)).findById(existingItemId);
         verify(itemRepository, times(1)).save(any(Item.class));
-        verify(fileStorageService, times(1)).saveItemImage(eq(newImage), eq(existingItemId));
+        verify(fileStorageService, times(1))
+                .saveFile(eq(newImage), eq("images/item"), eq(existingItemId), any(String.class));
     }
 
     @Test

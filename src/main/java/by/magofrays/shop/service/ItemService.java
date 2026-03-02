@@ -26,7 +26,7 @@ public class ItemService {
     private final FileStorageService fileStorageService;
 
     public ItemDto createItem(ItemDto itemDto, MultipartFile image){
-        log.info("Creating item: {}", itemDto.getTitle());
+        log.debug("Creating item: {}", itemDto.getTitle());
         if(itemDto.getDiscountPrice() != null &&  itemDto.getDiscountPrice().compareTo(itemDto.getPrice()) > 0){
             throw new BusinessException(HttpStatus.BAD_REQUEST);
         }
@@ -36,18 +36,26 @@ public class ItemService {
         if(image != null){
             setImageForItem(item, image);
         }
-        log.debug("Created item: {}", itemDto.getId());
+        log.info("Created item: {}", itemDto.getId());
         itemDto.setId(item.getId());
         return itemDto;
     }
 
     public void setImageForItem(Item item, MultipartFile image){
-        String url = fileStorageService.saveItemImage(image, item.getId());
+        fileStorageService.validateImageFile(image);
+        String url = fileStorageService.uploadFile(image, "images/item", item.getId(), item.getImageUrl());
+        log.info("Setting new image: {} . For item: {}", item.getId(), url);
         item.setImageUrl(url);
     }
 
+    public void deleteItemImage(UUID itemId){
+        String url = itemRepository.findById(itemId).orElseThrow(
+                () -> new BusinessException(HttpStatus.NOT_FOUND)).getImageUrl();
+        fileStorageService.deleteFileForEntity(url, itemId);
+    }
+
     public ItemDto updateItem(ItemDto itemDto, MultipartFile image){
-        log.info("Updating item: {}", itemDto.getId());
+        log.debug("Updating item: {}", itemDto.getId());
         if(itemDto.getId() == null){
             throw new BusinessException(HttpStatus.BAD_REQUEST);
         }
@@ -64,7 +72,9 @@ public class ItemService {
         if(image != null){
             setImageForItem(item, image);
         }
-        return itemMapper.toDto(itemRepository.save(item));
+        item = itemRepository.save(item);
+        log.info("Updated item: {}", item.getId());
+        return itemMapper.toDto(item);
     }
 
 
