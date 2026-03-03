@@ -1,6 +1,7 @@
 package by.magofrays.shop.service;
 
 import by.magofrays.shop.dto.CartDto;
+import by.magofrays.shop.dto.CreateUpdateProfileDto;
 import by.magofrays.shop.dto.OrderDto;
 import by.magofrays.shop.dto.ReadProfileDto;
 import by.magofrays.shop.entity.Cart;
@@ -40,5 +41,9 @@ public class ProfileService {
         log.info("Getting profile info for profile: {}", profileId);
         return profileMapper.toDto(profileRepository.findById(profileId).orElseThrow(
                 () -> new BusinessException(HttpStatus.NOT_FOUND)));
+    }
+
+    public ReadProfileDto updateProfileDto(CreateUpdateProfileDto updateProfileDto){
+        return null;
     }
 }

@@ -2,11 +2,13 @@ package by.magofrays.shop.unittest;
 
 import by.magofrays.shop.exception.BusinessException;
 import by.magofrays.shop.service.FileStorageService;
+import com.sun.org.apache.xpath.internal.operations.Mult;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.TestPropertySource;
@@ -17,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
@@ -54,9 +57,9 @@ public class FileStorageServiceTest {
 
         MultipartFile image = createMockImage();
         byte[] imageContent = image.getBytes();
-        String savedPath = fileStorageService.saveFile(image, "images/item", itemId, null);
+        String savedPath = fileStorageService.uploadFile(image, "images/item", itemId, null);
         assertNotNull(savedPath);
-        assertTrue(savedPath.startsWith("images/item/item-"));
+        assertTrue(savedPath.startsWith("images/item/image-"));
         assertTrue(savedPath.endsWith(".jpg"));
         Path expectedFilePath = tempDir.resolve("upload/images/item")
                 .resolve(savedPath.substring("images/item/".length()));
@@ -96,11 +99,10 @@ public class FileStorageServiceTest {
     @SneakyThrows
     public void updateImageTest(){
         MultipartFile image = createMockImage();
-
         MultipartFile newImage = createMockImage();
         byte[] imageContent = newImage.getBytes();
-        String oldImagePath = fileStorageService.saveFile(image, "images/item", itemId, null);
-        String newImagePath = fileStorageService.saveFile(newImage, "images/item", itemId, oldImagePath);
+        String oldImagePath = fileStorageService.uploadFile(image, "images/item", itemId, null);
+        String newImagePath = fileStorageService.uploadFile(newImage, "images/item", itemId, oldImagePath);
         Path oldPath = tempDir.resolve("upload/").resolve(oldImagePath);
         Path newPath = tempDir.resolve("upload/").resolve(newImagePath);
         assertTrue(Files.exists(newPath));
@@ -110,22 +112,31 @@ public class FileStorageServiceTest {
 
     private MultipartFile createMockImage(){
         byte[] imageContent = UUID.randomUUID().toString().getBytes();
-        return new MockMultipartFile(
+        MultipartFile file = new MockMultipartFile(
                 "image",
-                UUID.randomUUID()+".jpg",
+                "image.jpg",
                 "image/jpeg",
                 imageContent
         );
+        assertDoesNotThrow(() -> fileStorageService.validateImageFile(file));
+        return file;
     }
 
     @Test
     @SneakyThrows
-    public void saveAndLoadImageTest(){
+    public void uploadAndLoadImageTest(){
         MultipartFile file = createMockImage();
-        String url = fileStorageService.saveFile(file, "images/item", itemId, null);
+        String url = fileStorageService.uploadFile(file, "images/item", itemId, null);
         Resource img = fileStorageService.getFileByPath(url);
+        assertNotNull(img);
+        assertTrue(img.exists());
+        resourceEqualsTest(img, file.getBytes());
+    }
+
+    @SneakyThrows
+    public void resourceEqualsTest(Resource file, byte[] bytes){
         byte[] loadedBytes;
-        try (InputStream is = img.getInputStream();
+        try (InputStream is = file.getInputStream();
              ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
             byte[] tmp = new byte[1024];
             int n;
@@ -134,6 +145,46 @@ public class FileStorageServiceTest {
             }
             loadedBytes = buffer.toByteArray();
         }
-        assertArrayEquals(file.getBytes(), loadedBytes);
+        assertArrayEquals(bytes, loadedBytes);
+    }
+
+    @Test
+    @SneakyThrows
+    public void updateAndLoadFileTest(){
+        Resource file = new ByteArrayResource(
+                "test".getBytes(StandardCharsets.UTF_8)
+        ){
+            @Override
+            public String getFilename(){
+                return "test.txt";
+            }
+        };
+        String filename = file.getFilename();
+        UUID entityId = UUID.randomUUID();
+        String url = assertDoesNotThrow(() -> fileStorageService.saveFile(file, "test/test", entityId, null));
+        Path saveDir = tempDir.resolve("save/");
+        assertTrue(Files.exists(saveDir.resolve(url)));
+        Resource savedFile = fileStorageService.getFileByPath(url);
+        assertNotNull(savedFile);
+        assertTrue(savedFile.exists());
+        assertNotNull(savedFile.getFilename());
+        resourceEqualsTest(savedFile, "test".getBytes(StandardCharsets.UTF_8));
+
+        Resource newFile = new ByteArrayResource(
+                "new file".getBytes(StandardCharsets.UTF_8)
+        ){
+            @Override
+            public String getFilename(){
+                return "test2.txt";
+            }
+        };
+        String url2 = assertDoesNotThrow(() -> fileStorageService.saveFile(newFile, "test/test", entityId, url));
+        assertFalse(Files.exists(saveDir.resolve(url)));
+        assertTrue(Files.exists(saveDir.resolve(url2)));
+        Resource savedFile2 = fileStorageService.getFileByPath(url2);
+        assertNotNull(savedFile2);
+        assertTrue(savedFile2.exists());
+        assertNotNull(savedFile2.getFilename());
+        resourceEqualsTest(savedFile2, "new file".getBytes(StandardCharsets.UTF_8));
     }
 }

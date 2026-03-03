@@ -3,10 +3,7 @@ package by.magofrays.shop.dto;
 import by.magofrays.shop.entity.OrderItem;
 import by.magofrays.shop.entity.OrderStatus;
 import by.magofrays.shop.entity.Profile;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -18,6 +15,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode
 public class OrderDto {
 
     private UUID id;

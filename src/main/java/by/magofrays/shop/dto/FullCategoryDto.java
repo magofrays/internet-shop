@@ -1,12 +1,14 @@
 package by.magofrays.shop.dto;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
 @Data
+@EqualsAndHashCode
 public class FullCategoryDto {
     private UUID id;
     private String title;

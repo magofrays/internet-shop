@@ -15,9 +15,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.mail.MessagingException;
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,7 +42,6 @@ public class OrderService {
                 .orderStatus(OrderStatus.PENDING_PAYMENT)
                 .currency("RUB")
                 .build();
-        List<OrderItem> orderItems = new ArrayList<>();
         BigDecimal price = new BigDecimal(0);
         BigDecimal discountPrice = new BigDecimal(0);
         for(CartItemDto itemDto : items){
@@ -59,13 +56,10 @@ public class OrderService {
             OrderItem orderItem = createOrderItem(order, item);
             price = price.add(orderItem.getCost());
             discountPrice = discountPrice.add(orderItem.getDiscountCost());
-            orderItems.add(
-                    orderItem
-            );
+            order.getItemList().add(orderItem);
         }
         order.setTotalCost(price);
         order.setDiscountCost(discountPrice);
-        order.setItemList(orderItems);
         order = orderRepository.save(order);
         log.info("Created order {} for profile {}", order.getId(), profileId);
         OrderDto orderDto = orderMapper.toDto(order);

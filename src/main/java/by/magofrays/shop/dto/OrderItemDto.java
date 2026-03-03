@@ -4,6 +4,7 @@ import by.magofrays.shop.entity.Item;
 import by.magofrays.shop.entity.Order;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -15,6 +16,7 @@ import java.util.UUID;
 
 @Data
 @Builder
+@EqualsAndHashCode
 public class OrderItemDto {
     private UUID id;
     private ItemDto item;

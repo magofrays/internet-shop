@@ -42,8 +42,8 @@ public class FileStorageService {
         Files.createDirectories(baseUploadPath);
     }
 
-    private void createDir(String url){
-        Path fullPath = baseUploadPath.resolve(url);
+    private void createDir(String url, boolean save){
+        Path fullPath = save ? baseSavePath.resolve(url) : baseUploadPath.resolve(url);
         if(Files.exists(fullPath)){
             return;
         }
@@ -56,11 +56,10 @@ public class FileStorageService {
     @SneakyThrows
     public String saveFile(Resource file, String url, UUID entityId, String oldPath){
         log.debug("Trying to save file for entity: {}", entityId);
-        String start = url.substring(url.lastIndexOf("/") + 1);
-        createDir(url);
+        createDir(url, true);
         Object fileLock = fileLocks.computeIfAbsent(entityId, k -> new Object());
         synchronized (fileLock){
-            String newFileName = generateFileName(entityId, file.getFilename(), start);
+            String newFileName = generateFileName(entityId, file.getFilename());
             if(oldPath != null){
                 Path pathToDelete = baseSavePath.resolve(oldPath);
                 deleteFile(pathToDelete);
@@ -76,11 +75,10 @@ public class FileStorageService {
     @SneakyThrows
     public String uploadFile(MultipartFile file, String url, UUID entityId, String oldPath){
         log.debug("Trying to upload file for entity: {}", entityId);
-        String start = url.substring(url.lastIndexOf("/") + 1);
-        createDir(url);
+        createDir(url, false);
         Object fileLock = fileLocks.computeIfAbsent(entityId, k -> new Object());
         synchronized (fileLock){
-            String newFileName = generateFileName(entityId, file.getOriginalFilename(), start);
+            String newFileName = generateFileName(entityId, file.getOriginalFilename());
             if(oldPath != null){
                 Path pathToDelete = baseUploadPath.resolve(oldPath);
                 deleteFile(pathToDelete);
@@ -115,11 +113,12 @@ public class FileStorageService {
         Files.delete(filePath);
     }
 
-    private String generateFileName(UUID id, String filename, String start){
-        log.debug("Generating filename for image for entity {} with id {}", start, id);
+    private String generateFileName(UUID id, String filename){
+        log.debug("Generating filename for file {} for entity {}", filename, id);
         String extension = getFileExtension(filename);
         int unique = counter.getAndIncrement();
-        return start + String.format("-%s-%d-%d.%s",
+        String removeEx = removeFileExtension(filename);
+        return removeEx + String.format("-%s-%d-%d.%s",
                 id.toString(),
                 System.currentTimeMillis(),
                 unique,
@@ -160,6 +159,11 @@ public class FileStorageService {
         return originalFilename
                 .substring(originalFilename.lastIndexOf(".") + 1)
                 .toLowerCase();
+    }
+
+    private String removeFileExtension(String filename){
+        int lastDotIndex = filename.lastIndexOf(".");
+        return filename.substring(0, lastDotIndex);
     }
 
     public Resource getFileByPath(String path){

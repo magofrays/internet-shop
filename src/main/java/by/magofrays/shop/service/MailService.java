@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.io.IOException;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -40,7 +41,8 @@ public class MailService {
         messageHelper.setSubject(subject);
         messageHelper.setText(message);
         Resource resource = fileStorageService.getFileByPath(attachment);
-        messageHelper.addAttachment("Purchase Order", resource);
+        String res = resource.getFilename();
+        messageHelper.addAttachment(Objects.requireNonNull(resource.getFilename()), resource);
         mailSender.send(mimeMessage);
     }
 }
