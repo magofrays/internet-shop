@@ -11,9 +11,7 @@ import java.util.UUID;
 
 @Data
 @Builder
-public class CreateUpdateProfileDto {
-    @NotNull
-    private UUID id;
+public class CreateProfileDto {
     @NotBlank
     private String firstName;
     @NotBlank

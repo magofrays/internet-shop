@@ -1,7 +1,7 @@
 package by.magofrays.shop.service;
 
 import by.magofrays.shop.configuration.security.JwtUtils;
-import by.magofrays.shop.dto.CreateUpdateProfileDto;
+import by.magofrays.shop.dto.CreateProfileDto;
 import by.magofrays.shop.dto.LoginResponse;
 import by.magofrays.shop.entity.Cart;
 import by.magofrays.shop.entity.Profile;
@@ -58,7 +58,7 @@ public class AuthService implements UserDetailsService {
     }
 
     @Transactional
-    public UserDetails createProfile(CreateUpdateProfileDto createProfileDto){
+    public UserDetails createProfile(CreateProfileDto createProfileDto){
         log.info("Trying to create profile: {}", createProfileDto.getEmail());
         if(profileRepository.findByEmail(createProfileDto.getEmail()).isPresent()){
             log.error("Email {} already taken to create profile", createProfileDto.getEmail());

@@ -109,6 +109,23 @@ public class CategoryService {
         return categoryMapper.toFullDto(catalogue);
     }
 
+    public void deleteCategory(Category category){
+        if(!category.getCategoryList().isEmpty()){
+            category.getCategoryList().forEach(
+                    category1 -> deleteCategory(category)
+            );
+        }
+        category.getItemList().clear();
+        categoryRepository.delete(category);
+    }
+
+    @Transactional
+    public void deleteCategoryById(UUID categoryId){
+        Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+        deleteCategory(category);
+    }
+
+
     public List<CategoryDto> getCategoriesByParentCategory(UUID categoryId){
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(

@@ -54,6 +54,16 @@ public class ItemService {
         fileStorageService.deleteFileForEntity(url, itemId);
     }
 
+    public void deleteItem(UUID itemId){
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+        try{
+            deleteItemImage(itemId);
+        }catch (BusinessException be){
+            log.info("No image found, deleting item");
+        }
+        itemRepository.delete(item);
+    }
+
     public ItemDto updateItem(ItemDto itemDto, MultipartFile image){
         log.debug("Updating item: {}", itemDto.getId());
         if(itemDto.getId() == null){

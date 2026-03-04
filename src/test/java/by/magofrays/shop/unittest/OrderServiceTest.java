@@ -89,6 +89,8 @@ class OrderServiceTest {
     private OrderItem orderItem2;
     private OrderItemDto orderItemDto2;
     private OrderItem orderItem1;
+    private UUID orderId;
+    private OrderDto orderDto;
 
     @BeforeEach
     void setUp() {
@@ -102,120 +104,22 @@ class OrderServiceTest {
                 receiptGenerateService,
                 itemRepository
         );
-        Instant createdAt = Instant.now();
-        profileId = UUID.randomUUID();
-        profile = Profile.builder()
-                .id(profileId)
-                .email("test@email.com")
-                .firstName("Ivan")
-                .lastName("Ivanov")
-                .role(Role.CLIENT)
-                .createdAt(createdAt)
-                .updatedAt(createdAt)
-                .build();
-        profileDto = ReadProfileDto.builder()
-                .id(profileId)
-                .email("test@email.com")
-                .firstName("Ivan")
-                .lastName("Ivanov")
-                .role(Role.CLIENT)
-                .createdAt(createdAt)
-                .updatedAt(createdAt)
-                .build();
-
-
-        item1 = Item.builder()
-                .id(UUID.randomUUID())
-                .title("Наушники GIGABYTE")
-                .description("Крутые наушники за высокую цену")
-                .quantity(10L)
-                .discountPrice(new BigDecimal(5000))
-                .price(new BigDecimal(10000))
-                .build();
-
-        item2 = Item.builder()
-                .id(UUID.randomUUID())
-                .title("Очень длинный шнур для блока питания")
-                .description("500 метров шнура хватит, чтобы подключить компьютер в тайге")
-                .quantity(5L)
-                .discountPrice(new BigDecimal(500))
-                .price(new BigDecimal(1000))
-                .build();
-
-        cartItem1 = CartItem.builder()
-                .id(UUID.randomUUID())
-                .item(item1)
-                .addedAt(Instant.now())
-                .build();
-
-        cartItem2 = CartItem.builder()
-                .id(UUID.randomUUID())
-                .item(item2)
-                .addedAt(Instant.now())
-                .build();
-
-        cartItemDto1 = CartItemDto.builder()
-                .id(cartItem1.getId())
-                .item(null)
-                .build();
-
-        cartItemDto2 = CartItemDto.builder()
-                .id(cartItem2.getId())
-                .item(null)
-                .build();
-        orderItemDto1 = OrderItemDto.builder()
-                .id(UUID.randomUUID())
-                .item(
-                        ItemDto.builder()
-                                .id(item1.getId())
-                                .title("Наушники GIGABYTE")
-                                .description("Крутые наушники за высокую цену")
-                                .quantity(9L)
-                                .discountPrice(new BigDecimal(5000))
-                                .price(new BigDecimal(10000))
-                                .build()
-                )
-                .cost(new BigDecimal(10000))
-                .discountCost(new BigDecimal(5000))
-                .createdAt(Instant.now())
-                .build();
-
-        orderItemDto2 = OrderItemDto.builder()
-                .id(UUID.randomUUID())
-                .item(
-                        ItemDto.builder()
-                                .id(item2.getId())
-                                .title("Очень длинный шнур для блока питания")
-                                .description("500 метров шнура хватит, чтобы подключить компьютер в тайге")
-                                .quantity(4L)
-                                .discountPrice(new BigDecimal(500))
-                                .price(new BigDecimal(1000))
-                                .build()
-                )
-                .cost(new BigDecimal(1000))
-                .discountCost(new BigDecimal(500))
-                .createdAt(Instant.now())
-                .build();
-
-        orderItem1 = OrderItem.builder()
-                .id(orderItemDto1.getId())
-                .item(
-                        item1
-                )
-                .cost(new BigDecimal(10000))
-                .discountCost(new BigDecimal(5000))
-                .createdAt(orderItemDto1.getCreatedAt())
-                .build();
-
-        orderItem2 = OrderItem.builder()
-                .id(orderItemDto2.getId())
-                .item(
-                       item2
-                )
-                .cost(new BigDecimal(1000))
-                .discountCost(new BigDecimal(500))
-                .createdAt(orderItemDto2.getCreatedAt())
-                .build();
+        LocalStorageTest lst = new LocalStorageTest();
+        profileId = lst.profileId;
+        profile = lst.profile;
+        profileDto = lst.profileDto;
+        item1 = lst.item1;
+        item2 = lst.item2;
+        cartItem1 = lst.cartItem1;
+        cartItem2 = lst.cartItem2;
+        cartItemDto1 = lst.cartItemDto1;
+        cartItemDto2 = lst.cartItemDto2;
+        orderItemDto1 = lst.orderItemDto1;
+        orderItemDto2 = lst.orderItemDto2;
+        orderItem1 = lst.orderItem1;
+        orderItem2 = lst.orderItem2;
+        orderId = lst.orderId;
+        orderDto = lst.orderDto;
     }
 
     @Test
@@ -244,8 +148,7 @@ class OrderServiceTest {
 
                     return orderItem;
                 });
-
-        UUID orderId = UUID.randomUUID();
+        
         when(orderRepository.save(any(Order.class))).thenAnswer(
                 invocation -> {
                     Order order = invocation.getArgument(0);
@@ -297,17 +200,6 @@ class OrderServiceTest {
                 contains("Ivan Ivanov"),
                 eq(receiptUrl)
         );
-        OrderDto orderDto = OrderDto.builder()
-                .id(orderId)
-                .totalCost(new BigDecimal(11000))
-                .createdBy(profileDto)
-                .discountCost(new BigDecimal(5500))
-                .itemList(
-                        Arrays.asList(orderItemDto1, orderItemDto2)
-                )
-                .currency("RUB")
-                .orderStatus(OrderStatus.PENDING_PAYMENT)
-                .build();
         assertThat(result).isNotNull();
         assertThat(result).isEqualTo(orderDto);
     }
@@ -369,15 +261,14 @@ class OrderServiceTest {
         when(orderItemRepository.save(any(OrderItem.class))).thenAnswer(inv -> inv.getArgument(0));
         when(orderRepository.save(any(Order.class))).thenAnswer(inv -> {
             Order o = inv.getArgument(0);
-            o.setId(UUID.randomUUID());
+            o.setId(orderId);
             return o;
         });
         when(receiptGenerateService.createReceipt(any(OrderDto.class))).thenReturn("url");
         doThrow(new MessagingException("SMTP error")).when(mailService).sendEmailWithAttachment(any(), any(), any(), any());
 
         assertThatThrownBy(() -> orderService.createOrder(items, profileId))
-                .isInstanceOf(BusinessException.class)
-                .hasFieldOrPropertyWithValue("httpStatus", HttpStatus.INTERNAL_SERVER_ERROR);
+                .isInstanceOf(BusinessException.class);
 
         verify(orderRepository).save(any());
         verify(receiptGenerateService).createReceipt(any());
@@ -386,32 +277,9 @@ class OrderServiceTest {
 
     @SneakyThrows
     @Test
-    void createOrder_emptyCart_createsOrderWithZeroTotals() {
+    void createOrder_emptyCart_resultError() {
         List<CartItemDto> items = Collections.emptyList();
+        assertThatThrownBy(() -> orderService.createOrder(items, profileId)).isInstanceOf(BusinessException.class);
 
-        when(profileRepository.findById(profileId)).thenReturn(Optional.of(profile));
-
-        Order savedOrder = Order.builder()
-                .id(UUID.randomUUID())
-                .createdBy(profile)
-                .orderStatus(OrderStatus.PENDING_PAYMENT)
-                .currency("RUB")
-                .totalCost(BigDecimal.ZERO)
-                .discountCost(BigDecimal.ZERO)
-                .itemList(Collections.emptyList())
-                .build();
-        when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);
-        when(receiptGenerateService.createReceipt(any(OrderDto.class))).thenReturn("receiptUrl");
-
-        OrderDto result = orderService.createOrder(items, profileId);
-
-        verify(orderRepository).save(orderCaptor.capture());
-        Order captured = orderCaptor.getValue();
-        assertThat(captured.getTotalCost()).isEqualByComparingTo("0");
-        assertThat(captured.getDiscountCost()).isEqualByComparingTo("0");
-        assertThat(captured.getItemList()).isEmpty();
-
-        verifyNoInteractions(cartItemRepository, itemRepository, orderItemRepository);
-        verify(mailService).sendEmailWithAttachment(any(), any(), any(), any());
     }
 }

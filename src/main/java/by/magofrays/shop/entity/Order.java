@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -34,5 +35,8 @@ public class Order {
 
     private OrderStatus orderStatus;
     private String currency;
+
+    private Instant createdAt;
+    private Instant updatedAt;
 
 }

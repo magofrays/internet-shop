@@ -11,6 +11,5 @@ import java.util.UUID;
 @Builder
 public class UpdateOrderDto {
     private UUID orderId;
-    private OrderStatus orderStatus;
     private List<CartItemDto> items;
 }

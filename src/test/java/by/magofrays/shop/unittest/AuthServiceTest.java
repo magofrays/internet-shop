@@ -3,7 +3,7 @@ package by.magofrays.shop.unittest;
 
 import by.magofrays.shop.configuration.security.JwtUtils;
 import by.magofrays.shop.configuration.security.SecurityJwtProperties;
-import by.magofrays.shop.dto.CreateUpdateProfileDto;
+import by.magofrays.shop.dto.CreateProfileDto;
 import by.magofrays.shop.dto.LoginResponse;
 import by.magofrays.shop.entity.Cart;
 import by.magofrays.shop.entity.Profile;
@@ -61,7 +61,7 @@ public class AuthServiceTest {
 
     @Test
     public void createProfileTest(){
-        CreateUpdateProfileDto createUpdateProfileDto = CreateUpdateProfileDto.builder()
+        CreateProfileDto createUpdateProfileDto = CreateProfileDto.builder()
                 .firstName("test")
                 .lastName("test")
                 .email("test@mail.ru")
@@ -94,7 +94,7 @@ public class AuthServiceTest {
 
     @Test
     public void createProfileWithErrorTest(){
-        CreateUpdateProfileDto createProfileDto = CreateUpdateProfileDto.builder()
+        CreateProfileDto createProfileDto = CreateProfileDto.builder()
                 .firstName("test")
                 .lastName("test")
                 .email("test@mail.ru")

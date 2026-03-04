@@ -1,7 +1,6 @@
 package by.magofrays.shop.controller;
 
-import by.magofrays.shop.configuration.security.JwtUtils;
-import by.magofrays.shop.dto.CreateUpdateProfileDto;
+import by.magofrays.shop.dto.CreateProfileDto;
 import by.magofrays.shop.dto.LoginDto;
 import by.magofrays.shop.dto.LoginResponse;
 import by.magofrays.shop.service.AuthService;
@@ -16,8 +15,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.time.Instant;
 
 @RestController
 @RequiredArgsConstructor
@@ -39,7 +36,7 @@ public class AuthController {
     }
 
     @PostMapping("/sign-up")
-    public LoginResponse signUp(@RequestBody @Validated CreateUpdateProfileDto createProfileDto){
+    public LoginResponse signUp(@RequestBody @Validated CreateProfileDto createProfileDto){
         return authService.createLoginResponse(
                 authService
                         .createProfile(createProfileDto)

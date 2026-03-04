@@ -43,7 +43,7 @@ spring:
           auth: false
           starttls:
             enable: false
-    from-address: noreply@shop.ru
+      from-address: noreply@shop.ru
 
 receipt:
   template: payment-receipt

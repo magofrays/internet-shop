@@ -2,6 +2,7 @@ package by.magofrays.shop.service;
 
 import by.magofrays.shop.dto.CartItemDto;
 import by.magofrays.shop.dto.OrderDto;
+import by.magofrays.shop.dto.UpdateOrderDto;
 import by.magofrays.shop.entity.*;
 import by.magofrays.shop.exception.BusinessException;
 import by.magofrays.shop.mapper.OrderMapper;
@@ -16,8 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.mail.MessagingException;
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.UUID;
+import java.math.BigInteger;
+import java.time.Instant;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -34,6 +36,9 @@ public class OrderService {
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public OrderDto createOrder(List<CartItemDto> items, UUID profileId){
+        if(items.isEmpty()){
+            throw new BusinessException(HttpStatus.BAD_REQUEST);
+        }
         Profile profile = profileRepository.findById(profileId).orElseThrow(
                 () -> new BusinessException(HttpStatus.NOT_FOUND)
         );
@@ -63,16 +68,23 @@ public class OrderService {
         order = orderRepository.save(order);
         log.info("Created order {} for profile {}", order.getId(), profileId);
         OrderDto orderDto = orderMapper.toDto(order);
+        createReceipt(orderDto, profile.getEmail(),
+                String.format("Здравствуйте, %s %s. \n Ваш заказ ожидает оплаты.",
+                        profile.getFirstName(), profile.getLastName()));
+        return orderDto;
+    }
+
+    private void createReceipt(OrderDto orderDto, String email, String message){
+
         String receiptUrl = receiptGenerateService.createReceipt(orderDto);
         try{
-        mailService.sendEmailWithAttachment(profile.getEmail(),
-                "Оформление заказа",
-                "Здравствуйте, " + profile.getFirstName() + " " + profile.getLastName() + ". \n Ваш заказ ожидает оплаты.",
-                receiptUrl);
+            mailService.sendEmailWithAttachment(email,
+                    "Оформление заказа",
+                    message + "\n\nС уважением,\n Интернет-магазин",
+                    receiptUrl);
         } catch (MessagingException messagingException){
             throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return orderDto;
     }
 
     public OrderItem createOrderItem(Order order, Item item){
@@ -84,9 +96,81 @@ public class OrderService {
                 .build());
     }
 
-
     @Transactional
-    public OrderDto updateOrder(){
-        return null;
+    public OrderDto getOrderById(UUID id){
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+        return orderMapper.toDto(order);
+    }
+
+    @Transactional(isolation = Isolation.REPEATABLE_READ) // system changes
+    public OrderDto updateOrderStatus(UUID orderId, OrderStatus orderStatus){
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+        order.setOrderStatus(orderStatus);
+        orderRepository.save(order);
+        return orderMapper.toDto(order);
+    }
+
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public void deleteOrder(UUID orderId){
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+        order.getItemList().clear();
+        orderRepository.delete(order);
+    }
+
+    @Transactional(isolation = Isolation.REPEATABLE_READ) // client changes
+    public OrderDto updateOrder(UpdateOrderDto orderDto) {
+        Order order = orderRepository.findById(orderDto.getOrderId())
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+        Profile profile = order.getCreatedBy();
+        List<CartItemDto> cartItems = orderDto.getItems();
+        List<OrderItem> removalItems = new ArrayList<>();
+        Set<CartItemDto> alreadyExist = new HashSet<>();
+        BigDecimal cost = new BigDecimal(0);
+        BigDecimal discountCost = new BigDecimal(0);
+        for (OrderItem orderItem : order.getItemList()) {
+            boolean exists = false;
+            for (CartItemDto cartItem : cartItems)
+                if (!alreadyExist.contains(cartItem) && orderItem.getItem().getId().equals(cartItem.getItem().getId())) {
+                    exists = true;
+                    cost = cost.add(orderItem.getCost());
+                    discountCost = discountCost.add(orderItem.getDiscountCost());
+                    alreadyExist.add(cartItem);
+                }
+            if(!exists){
+                removalItems.add(orderItem);
+            }
+        }
+        order.getItemList().removeAll(removalItems);
+        if(order.getItemList().isEmpty()){
+            throw new BusinessException(HttpStatus.BAD_REQUEST);
+        }
+        orderItemRepository.deleteAll(removalItems);
+        for (CartItemDto addItem : cartItems){
+            if(alreadyExist.contains(addItem)){
+               continue;
+            }
+            Item item = itemRepository.findById(addItem.getItem().getId())
+                    .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+            if(item.getQuantity() == 0){
+                throw new BusinessException(HttpStatus.BAD_REQUEST);
+            }
+            item.setQuantity(item.getQuantity()-1);
+            itemRepository.save(item);
+            OrderItem orderItem = createOrderItem(order, item);
+            cost = cost.add(orderItem.getCost());
+            discountCost = discountCost.add(orderItem.getDiscountCost());
+        }
+        order.setTotalCost(cost);
+        order.setDiscountCost(discountCost);
+        order.setUpdatedAt(Instant.now());
+        orderRepository.save(order);
+        OrderDto result = orderMapper.toDto(order);
+        createReceipt(result, profile.getEmail(),
+                String.format("Здравствуйте, %s %s. \n Ваш заказ был изменен и ожидает оплаты.",
+                        profile.getFirstName(), profile.getLastName()));
+        return result;
     }
 }
