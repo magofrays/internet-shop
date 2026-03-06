@@ -1,19 +1,15 @@
 package by.magofrays.shop.dto;
 
 import by.magofrays.shop.entity.OrderStatus;
-import lombok.Builder;
 import lombok.Data;
 
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.util.List;
 import java.util.UUID;
 
 @Data
-@Builder
-public class UpdateOrderDto {
+public class UpdateOrderStatus {
     @NotNull
     private UUID orderId;
-    @NotEmpty
-    private List<CartItemDto> items;
+    @NotNull
+    private OrderStatus orderStatus;
 }

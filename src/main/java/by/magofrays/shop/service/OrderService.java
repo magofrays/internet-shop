@@ -3,6 +3,7 @@ package by.magofrays.shop.service;
 import by.magofrays.shop.dto.CartItemDto;
 import by.magofrays.shop.dto.OrderDto;
 import by.magofrays.shop.dto.UpdateOrderDto;
+import by.magofrays.shop.dto.UpdateOrderStatus;
 import by.magofrays.shop.entity.*;
 import by.magofrays.shop.exception.BusinessException;
 import by.magofrays.shop.mapper.OrderMapper;
@@ -104,10 +105,10 @@ public class OrderService {
     }
 
     @Transactional(isolation = Isolation.REPEATABLE_READ) // system changes
-    public OrderDto updateOrderStatus(UUID orderId, OrderStatus orderStatus){
-        Order order = orderRepository.findById(orderId)
+    public OrderDto updateOrderStatus(UpdateOrderStatus orderStatus){
+        Order order = orderRepository.findById(orderStatus.getOrderId())
                 .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
-        order.setOrderStatus(orderStatus);
+        order.setOrderStatus(orderStatus.getOrderStatus());
         orderRepository.save(order);
         return orderMapper.toDto(order);
     }

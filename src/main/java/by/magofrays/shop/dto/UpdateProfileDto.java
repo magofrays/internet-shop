@@ -10,7 +10,6 @@ import java.util.UUID;
 @Data
 @Builder
 public class UpdateProfileDto {
-    @NotNull
     private UUID id;
     @NotBlank
     private String firstname;

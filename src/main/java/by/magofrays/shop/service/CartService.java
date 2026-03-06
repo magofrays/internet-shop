@@ -43,15 +43,23 @@ public class CartService {
                 .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
         Cart cart = profile.getCart();
         CartItem cartItem = createCartItem(cart, item);
+        cart.getItemList().add(cartItem);
         return cartItemMapper.toDto(cartItem);
     }
 
     @Transactional
-    public CartItemDto removeItemFromCart(UUID cartItemId){
-        CartItem cartItem = cartItemRepository.findById(cartItemId)
+    public void removeItemFromCart(UUID cartItemId, UUID profileId){
+        Profile profile = profileRepository.findById(profileId)
                 .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+        Cart cart = profile.getCart();
+        List<CartItem> items = cart.getItemList();
+        CartItem cartItem = cartItemRepository.findById(cartItemId).
+                orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+        if(!items.contains(cartItem)){
+            throw new BusinessException(HttpStatus.BAD_REQUEST);
+        }
+        items.remove(cartItem);
         cartItemRepository.delete(cartItem);
-        return cartItemMapper.toDto(cartItem);
     }
 
     public CartItem createCartItem(Cart cart, Item item){

@@ -7,6 +7,7 @@ import by.magofrays.shop.dto.UpdateProfileDto;
 import by.magofrays.shop.entity.Cart;
 import by.magofrays.shop.entity.Order;
 import by.magofrays.shop.entity.Profile;
+import by.magofrays.shop.entity.Role;
 import by.magofrays.shop.exception.BusinessException;
 import by.magofrays.shop.mapper.*;
 import by.magofrays.shop.repository.CartRepository;
@@ -182,6 +183,20 @@ public class ProfileServiceTest {
         when(profileRepository.findById(profileId)).thenReturn(Optional.empty());
         assertThrows(BusinessException.class, () -> profileService.deleteProfile(profileId));
         verify(profileRepository, never()).delete(any());
+    }
+
+    @Test
+    public void updateProfileRoleTest(){
+        when(profileRepository.findById(eq(profile.getId()))).thenReturn(Optional.of(profile));
+        when(profileRepository.save(eq(profile))).thenAnswer(profile1 -> profile1.getArgument(0));
+        ReadProfileDto profileDto = profileService.updateProfileRole(profile.getId(), Role.ADMIN);
+        assertEquals(Role.ADMIN, profileDto.getRole());
+    }
+
+    @Test
+    public void updateProfileRoleWithErrorTest(){
+        when(profileRepository.findById(eq(profile.getId()))).thenReturn(Optional.empty());
+        assertThrows(BusinessException.class, () -> profileService.updateProfileRole(profile.getId(), Role.ADMIN));
     }
 
 }

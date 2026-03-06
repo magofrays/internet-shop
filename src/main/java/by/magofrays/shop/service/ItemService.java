@@ -7,6 +7,7 @@ import by.magofrays.shop.mapper.ItemMapper;
 import by.magofrays.shop.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -45,6 +46,11 @@ public class ItemService {
         String url = fileStorageService.uploadFile(image, "images/item", item.getId(), item.getImageUrl());
         log.info("Setting new image: {} . For item: {}", item.getId(), url);
         item.setImageUrl(url);
+    }
+
+    public void setImageForItemId(UUID itemId, MultipartFile image){
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+        setImageForItem(item, image);
     }
 
     public void deleteItemImage(UUID itemId){
@@ -102,6 +108,14 @@ public class ItemService {
         return itemRepository.findAll().stream()
                 .map(itemMapper::toDto)
                 .collect(Collectors.toList());
+    }
+
+    public Resource getItemImage(UUID itemId){
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+        if(item.getImageUrl() == null){
+            throw new BusinessException(HttpStatus.NOT_FOUND);
+        }
+        return fileStorageService.getFileByPath(item.getImageUrl());
     }
 
 }

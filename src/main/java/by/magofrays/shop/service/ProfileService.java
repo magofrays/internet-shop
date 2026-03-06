@@ -6,6 +6,7 @@ import by.magofrays.shop.dto.ReadProfileDto;
 import by.magofrays.shop.dto.UpdateProfileDto;
 import by.magofrays.shop.entity.Cart;
 import by.magofrays.shop.entity.Profile;
+import by.magofrays.shop.entity.Role;
 import by.magofrays.shop.exception.BusinessException;
 import by.magofrays.shop.mapper.CartMapper;
 import by.magofrays.shop.mapper.OrderMapper;
@@ -67,6 +68,14 @@ public class ProfileService {
         return profileMapper.toDto(profile);
     }
 
+    public ReadProfileDto updateProfileRole(UUID profileId, Role role){
+        Profile profile = profileRepository.findById(profileId)
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+        profile.setRole(role);
+        profile = profileRepository.save(profile);
+        return profileMapper.toDto(profile);
+    }
+
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void deleteProfile(UUID profileId){
         log.info("Deleting profile: {}", profileId);
@@ -78,5 +87,16 @@ public class ProfileService {
         profileRepository.delete(profile);
     }
 
+    public List<ReadProfileDto> getAllProfiles(){
+        return profileRepository.findAll().stream().map(profileMapper::toDto).collect(Collectors.toList());
+    }
+
+    public ReadProfileDto getProfileById(UUID profileId){
+        return profileMapper.toDto(
+                profileRepository
+                        .findById(profileId)
+                        .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND))
+        );
+    }
 
 }
