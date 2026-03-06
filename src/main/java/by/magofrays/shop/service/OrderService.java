@@ -69,7 +69,7 @@ public class OrderService {
         log.info("Created order {} for profile {}", order.getId(), profileId);
         OrderDto orderDto = orderMapper.toDto(order);
         createReceipt(orderDto, profile.getEmail(),
-                String.format("Здравствуйте, %s %s. \n Ваш заказ ожидает оплаты.",
+                String.format("Здравствуйте, %s %s.\nВаш заказ ожидает оплаты.",
                         profile.getFirstName(), profile.getLastName()));
         return orderDto;
     }
@@ -80,7 +80,7 @@ public class OrderService {
         try{
             mailService.sendEmailWithAttachment(email,
                     "Оформление заказа",
-                    message + "\n\nС уважением,\n Интернет-магазин",
+                    message + "\n\nС уважением,\nИнтернет-магазин",
                     receiptUrl);
         } catch (MessagingException messagingException){
             throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -112,6 +112,11 @@ public class OrderService {
         return orderMapper.toDto(order);
     }
 
+    public void deleteOrder(Order order){
+        order.getItemList().clear();
+        orderRepository.delete(order);
+    }
+
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void deleteOrder(UUID orderId){
         Order order = orderRepository.findById(orderId)
@@ -122,6 +127,9 @@ public class OrderService {
 
     @Transactional(isolation = Isolation.REPEATABLE_READ) // client changes
     public OrderDto updateOrder(UpdateOrderDto orderDto) {
+        if(orderDto.getItems().isEmpty()){
+            throw new BusinessException(HttpStatus.BAD_REQUEST);
+        }
         Order order = orderRepository.findById(orderDto.getOrderId())
                 .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
         Profile profile = order.getCreatedBy();
@@ -143,11 +151,7 @@ public class OrderService {
                 removalItems.add(orderItem);
             }
         }
-        order.getItemList().removeAll(removalItems);
-        if(order.getItemList().isEmpty()){
-            throw new BusinessException(HttpStatus.BAD_REQUEST);
-        }
-        orderItemRepository.deleteAll(removalItems);
+
         for (CartItemDto addItem : cartItems){
             if(alreadyExist.contains(addItem)){
                continue;
@@ -162,14 +166,17 @@ public class OrderService {
             OrderItem orderItem = createOrderItem(order, item);
             cost = cost.add(orderItem.getCost());
             discountCost = discountCost.add(orderItem.getDiscountCost());
+            order.getItemList().add(orderItem);
         }
         order.setTotalCost(cost);
         order.setDiscountCost(discountCost);
         order.setUpdatedAt(Instant.now());
+        order.getItemList().removeAll(removalItems);
+        orderItemRepository.deleteAll(removalItems);
         orderRepository.save(order);
         OrderDto result = orderMapper.toDto(order);
         createReceipt(result, profile.getEmail(),
-                String.format("Здравствуйте, %s %s. \n Ваш заказ был изменен и ожидает оплаты.",
+                String.format("Здравствуйте, %s %s.\nВаш заказ был изменен и ожидает оплаты.",
                         profile.getFirstName(), profile.getLastName()));
         return result;
     }

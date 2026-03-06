@@ -112,15 +112,16 @@ public class CategoryService {
     public void deleteCategory(Category category){
         if(!category.getCategoryList().isEmpty()){
             category.getCategoryList().forEach(
-                    category1 -> deleteCategory(category)
+                    this::deleteCategory
             );
         }
+        category.getCategoryList().clear();
         category.getItemList().clear();
         categoryRepository.delete(category);
     }
 
     @Transactional
-    public void deleteCategoryById(UUID categoryId){
+    public void deleteCatalogueById(UUID categoryId){
         Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
         deleteCategory(category);
     }

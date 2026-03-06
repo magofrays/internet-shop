@@ -5,6 +5,7 @@ import by.magofrays.shop.entity.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -34,18 +35,36 @@ public class LocalStorageTest {
     public Item item1 = Item.builder()
             .id(UUID.randomUUID())
             .title("Наушники GIGABYTE")
-                .description("Крутые наушники за высокую цену")
-                .quantity(10L)
-                .discountPrice(new BigDecimal(5000))
+            .description("Крутые наушники за высокую цену")
+            .quantity(10L)
+            .discountPrice(new BigDecimal(5000))
             .price(new BigDecimal(10000))
             .build();
 
     public Item item2 = Item.builder()
             .id(UUID.randomUUID())
             .title("Очень длинный шнур для блока питания")
-                .description("500 метров шнура хватит, чтобы подключить компьютер в тайге")
-                .quantity(5L)
-                .discountPrice(new BigDecimal(500))
+            .description("500 метров шнура хватит, чтобы подключить компьютер в тайге")
+            .quantity(5L)
+            .discountPrice(new BigDecimal(500))
+            .price(new BigDecimal(1000))
+            .build();
+
+    public ItemDto itemDto1 = ItemDto.builder()
+            .id(item1.getId())
+            .title("Наушники GIGABYTE")
+            .description("Крутые наушники за высокую цену")
+            .quantity(10L)
+            .discountPrice(new BigDecimal(5000))
+            .price(new BigDecimal(10000))
+            .build();
+
+    public ItemDto itemDto2 = ItemDto.builder()
+            .id(item2.getId())
+            .title("Очень длинный шнур для блока питания")
+            .description("500 метров шнура хватит, чтобы подключить компьютер в тайге")
+            .quantity(5L)
+            .discountPrice(new BigDecimal(500))
             .price(new BigDecimal(1000))
             .build();
 
@@ -63,43 +82,27 @@ public class LocalStorageTest {
 
     public CartItemDto cartItemDto1 = CartItemDto.builder()
             .id(cartItem1.getId())
-            .item(null)
+            .item(itemDto1)
+            .addedAt(cartItem1.getAddedAt())
                 .build();
 
     public CartItemDto cartItemDto2 = CartItemDto.builder()
             .id(cartItem2.getId())
-            .item(null)
+            .item(itemDto2)
+            .addedAt(cartItem2.getAddedAt())
                 .build();
     public OrderItemDto orderItemDto1 = OrderItemDto.builder()
             .id(UUID.randomUUID())
-            .item(
-            ItemDto.builder()
-                                .id(item1.getId())
-            .title("Наушники GIGABYTE")
-                                .description("Крутые наушники за высокую цену")
-                                .quantity(9L)
-                                .discountPrice(new BigDecimal(5000))
-            .price(new BigDecimal(10000))
-            .build()
-                )
-                        .cost(new BigDecimal(10000))
+            .item(itemDto1)
+            .cost(new BigDecimal(10000))
             .discountCost(new BigDecimal(5000))
             .createdAt(Instant.now())
             .build();
 
     public OrderItemDto orderItemDto2 = OrderItemDto.builder()
             .id(UUID.randomUUID())
-            .item(
-            ItemDto.builder()
-                                .id(item2.getId())
-            .title("Очень длинный шнур для блока питания")
-                                .description("500 метров шнура хватит, чтобы подключить компьютер в тайге")
-                                .quantity(4L)
-                                .discountPrice(new BigDecimal(500))
-            .price(new BigDecimal(1000))
-            .build()
-                )
-                        .cost(new BigDecimal(1000))
+            .item(itemDto2)
+            .cost(new BigDecimal(1000))
             .discountCost(new BigDecimal(500))
             .createdAt(Instant.now())
             .build();
@@ -130,6 +133,8 @@ public class LocalStorageTest {
                 .totalCost(new BigDecimal(11000))
             .createdBy(profileDto)
                 .discountCost(new BigDecimal(5500))
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
             .itemList(
             Arrays.asList(orderItemDto1, orderItemDto2)
                 )
@@ -139,12 +144,14 @@ public class LocalStorageTest {
     public Cart cart = Cart.builder()
             .id(UUID.randomUUID())
             .profile(profile)
-            .itemList(Arrays.asList(
+            .itemList(new ArrayList<>(Arrays.asList(
                     cartItem1,
                     cartItem2
-            ))
+            )))
             .build();
-
+    {
+        profile.setCart(cart);
+    }
     public CartDto cartDto = CartDto.builder()
             .id(cart.getId())
             .profileId(profileId)
@@ -161,9 +168,11 @@ public class LocalStorageTest {
             .orderStatus(OrderStatus.PENDING_PAYMENT)
             .discountCost(orderDto.getDiscountCost())
             .totalCost(orderDto.getTotalCost())
-            .itemList(Arrays.asList(
+            .itemList(new ArrayList<>(Arrays.asList(
                     orderItem1,
-                    orderItem2
+                    orderItem2)
             ))
+            .createdAt(orderDto.getCreatedAt())
+            .updatedAt(orderDto.getUpdatedAt())
             .build();
 }

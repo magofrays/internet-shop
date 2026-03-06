@@ -48,9 +48,10 @@ public class CategoryServiceTest {
     private Category category;
     private Category parentCategory;
     private Item item;
-
+    private LocalStorageTest lst;
     @BeforeEach
     void setUp() {
+         lst = new LocalStorageTest();
         categoryId = UUID.randomUUID();
         parentId = UUID.randomUUID();
         itemId = UUID.randomUUID();
@@ -83,7 +84,6 @@ public class CategoryServiceTest {
                 .build();
     }
 
-    // ---- getRootCatalogues ----
     @Test
     void getRootCatalogues_ShouldReturnListOfDtos_WhenRootCategoriesExist() {
         when(categoryRepository.getCategoriesByParentCatalogue(null)).thenReturn(Collections.singletonList(category));
@@ -106,7 +106,6 @@ public class CategoryServiceTest {
         assertTrue(result.isEmpty());
     }
 
-    // ---- createCatalogue ----
     @Test
     void createCatalogue_WithoutParent_ShouldSaveAndReturnDto() {
         CreateUpdateCategoryDto dto = CreateUpdateCategoryDto.builder()
@@ -145,7 +144,7 @@ public class CategoryServiceTest {
         Category parent = Category.builder()
                 .id(parentId)
                 .title("Parent")
-                .itemList(new ArrayList<>()) // пустой список товаров
+                .itemList(new ArrayList<>())
                 .build();
 
         when(categoryRepository.findById(parentId)).thenReturn(Optional.of(parent));
@@ -155,7 +154,6 @@ public class CategoryServiceTest {
 
         assertNotNull(result);
         assertEquals(dto.getTitle(), result.getTitle());
-        // Проверим, что родитель добавил ребёнка
         assertEquals(1, parent.getCategoryList().size());
         assertEquals(result.getId(), parent.getCategoryList().get(0).getId());
         verify(categoryRepository, times(1)).findById(parentId);
@@ -185,7 +183,7 @@ public class CategoryServiceTest {
 
         Category parent = Category.builder()
                 .id(parentId)
-                .itemList(Collections.singletonList(new Item())) // не пустой список
+                .itemList(Collections.singletonList(new Item()))
                 .build();
 
         when(categoryRepository.findById(parentId)).thenReturn(Optional.of(parent));
@@ -195,7 +193,6 @@ public class CategoryServiceTest {
         verify(categoryRepository, never()).save(any());
     }
 
-    // ---- updateCatalogue ----
     @Test
     void updateCatalogue_ShouldUpdateFieldsAndChangeParent_WhenParentChanged() {
         UUID newParentId = UUID.randomUUID();
@@ -218,8 +215,7 @@ public class CategoryServiceTest {
 
         assertEquals(dto.getTitle(), category.getTitle());
         assertEquals(dto.getDescription(), category.getDescription());
-        // Проверяем, что родитель изменился
-        assertTrue(parentCategory.getCategoryList().isEmpty()); // старый родитель потерял ребёнка
+        assertTrue(parentCategory.getCategoryList().isEmpty());
         assertEquals(1, newParent.getCategoryList().size());
         assertEquals(category, newParent.getCategoryList().get(0));
         verify(categoryRepository, times(2)).findById(any());
@@ -232,21 +228,19 @@ public class CategoryServiceTest {
                 .id(categoryId)
                 .title("Updated Title")
                 .description("Updated Desc")
-                .parentCatalogueId(parentId) // тот же родитель
+                .parentCatalogueId(parentId)
                 .build();
 
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
-        // Не мокаем повторный findById, так как parent не меняется, и второй раз не вызывается
         when(categoryRepository.save(any(Category.class))).thenReturn(category);
 
         CategoryDto result = categoryService.updateCatalogue(dto);
 
-        assertEquals(dto.getTitle(), category.getTitle());
-        assertEquals(dto.getDescription(), category.getDescription());
-        // Проверяем, что родитель не менялся
+        assertEquals(dto.getTitle(), result.getTitle());
+        assertEquals(dto.getDescription(), result.getDescription());
         assertEquals(parentCategory, category.getParentCatalogue());
         verify(categoryRepository, times(1)).findById(categoryId);
-        verify(categoryRepository, never()).findById(parentId); // второй раз не вызывался
+        verify(categoryRepository, never()).findById(parentId);
         verify(categoryRepository, times(1)).save(category);
     }
 
@@ -277,15 +271,12 @@ public class CategoryServiceTest {
                 () -> categoryService.updateCatalogue(dto));
     }
 
-    // ---- addItemIntoCatalogue ----
     @Test
     void addItemIntoCatalogue_ShouldAddItem_WhenCatalogueHasNoSubcategories() {
         AddRemoveItemDto dto = AddRemoveItemDto.builder()
                 .positionId(categoryId)
                 .itemId(itemId)
                 .build();
-
-        // Категория без дочерних категорий
         category.setCategoryList(new ArrayList<>());
         category.setItemList(new ArrayList<>());
 
@@ -309,7 +300,7 @@ public class CategoryServiceTest {
                 .itemId(itemId)
                 .build();
 
-        category.setCategoryList(Collections.singletonList(new Category())); // есть подкатегории
+        category.setCategoryList(Collections.singletonList(new Category()));
 
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
 
@@ -345,7 +336,6 @@ public class CategoryServiceTest {
                 () -> categoryService.addItemIntoCatalogue(dto));
     }
 
-    // ---- removeItemFromCatalogue ----
     @Test
     void removeItemFromCatalogue_ShouldRemoveItem_WhenItemExistsInCatalogue() {
         AddRemoveItemDto dto = AddRemoveItemDto.builder()
@@ -411,7 +401,6 @@ public class CategoryServiceTest {
                 () -> categoryService.removeItemFromCatalogue(dto));
     }
 
-    // ---- getCatalogueTree ----
     @Test
     void getCatalogueTree_ShouldReturnFullDto_WhenCategoryExists() {
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
@@ -421,7 +410,6 @@ public class CategoryServiceTest {
         assertNotNull(result);
         assertEquals(categoryId, result.getId());
         assertEquals(category.getTitle(), result.getTitle());
-        // Дочерние категории и товары мапятся рекурсивно, но в данном случае у category их нет
         verify(categoryRepository, times(1)).findById(categoryId);
     }
 
@@ -433,7 +421,6 @@ public class CategoryServiceTest {
                 () -> categoryService.getCatalogueTree(categoryId));
     }
 
-    // ---- getCategoriesByParentCategory ----
     @Test
     void getCategoriesByParentCategory_ShouldReturnListOfDtos() {
         Category child1 = Category.builder().id(UUID.randomUUID()).title("Child1").build();
@@ -456,4 +443,32 @@ public class CategoryServiceTest {
         BusinessException ex = assertThrows(BusinessException.class,
                 () -> categoryService.getCategoriesByParentCategory(parentId));
     }
+
+    @Test
+    void deleteCatalogueByIdTest(){
+        Category child1 = Category.builder().id(UUID.randomUUID())
+                .itemList(new ArrayList<>(Collections.singletonList(lst.item2)))
+                .title("Child1").build();
+        Category child2 = Category.builder().id(UUID.randomUUID())
+                .itemList(new ArrayList<>(Collections.singletonList(lst.item1)))
+                .title("Child2").build();
+        parentCategory.addChildCatalogue(child1);
+        parentCategory.addChildCatalogue(child2);
+        when(categoryRepository.findById(parentCategory.getId())).thenReturn(Optional.of(parentCategory));
+        categoryService.deleteCatalogueById(parentCategory.getId());
+        assertEquals(Collections.emptyList(), parentCategory.getCategoryList());
+        assertEquals(Collections.emptyList(), child1.getItemList());
+        assertEquals(Collections.emptyList(), child2.getItemList());
+        verify(categoryRepository).delete(child1);
+        verify(categoryRepository).delete(child2);
+        verify(categoryRepository).delete(parentCategory);
+    }
+
+    @Test
+    void deleteCatalogueByIdWithErrorTest(){
+        UUID categoryId = UUID.randomUUID();
+        when(categoryRepository.findById(eq(categoryId))).thenReturn(Optional.empty());
+        assertThrows(BusinessException.class, () -> categoryService.deleteCatalogueById(categoryId));
+    }
+
 }

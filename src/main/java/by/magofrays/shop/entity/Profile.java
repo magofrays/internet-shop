@@ -1,9 +1,6 @@
 package by.magofrays.shop.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.Instant;
@@ -16,6 +13,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(exclude = {"cart"})
 public class Profile {
     @Id
     @GeneratedValue
@@ -31,6 +29,9 @@ public class Profile {
     private Role role;
     private Instant createdAt;
     private Instant updatedAt;
+    @Builder.Default
+    @OneToMany(mappedBy = "createdBy")
+    List<Order> orders = new ArrayList<>();
 
     public void setCart(Cart cart){
         this.cart = cart;

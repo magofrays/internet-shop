@@ -91,6 +91,9 @@ class OrderServiceTest {
     private OrderItem orderItem1;
     private UUID orderId;
     private OrderDto orderDto;
+    private ItemDto itemDto2;
+    private ItemDto itemDto1;
+    private Order order;
 
     @BeforeEach
     void setUp() {
@@ -116,10 +119,13 @@ class OrderServiceTest {
         cartItemDto2 = lst.cartItemDto2;
         orderItemDto1 = lst.orderItemDto1;
         orderItemDto2 = lst.orderItemDto2;
+        itemDto1 = lst.itemDto1;
+        itemDto2 = lst.itemDto2;
         orderItem1 = lst.orderItem1;
         orderItem2 = lst.orderItem2;
         orderId = lst.orderId;
         orderDto = lst.orderDto;
+        order = lst.order;
     }
 
     @Test
@@ -153,17 +159,18 @@ class OrderServiceTest {
                 invocation -> {
                     Order order = invocation.getArgument(0);
                     order.setId(orderId);
+                    order.setCreatedAt(orderDto.getCreatedAt());
+                    order.setUpdatedAt(orderDto.getUpdatedAt());
                     return order;
                 }
         );
 
         String receiptUrl = "save/pdf/receipt";
         when(receiptGenerateService.createReceipt(any(OrderDto.class))).thenReturn(receiptUrl);
-
-
         OrderDto result = orderService.createOrder(items, profileId);
 
-
+        itemDto1.setQuantity(itemDto1.getQuantity()-1);
+        itemDto2.setQuantity(itemDto2.getQuantity()-1);
         verify(profileRepository).findById(profileId);
 
         verify(cartItemRepository).findById(cartItemDto1.getId());
@@ -280,6 +287,244 @@ class OrderServiceTest {
     void createOrder_emptyCart_resultError() {
         List<CartItemDto> items = Collections.emptyList();
         assertThatThrownBy(() -> orderService.createOrder(items, profileId)).isInstanceOf(BusinessException.class);
+    }
 
+    @Test
+    void deleteOrder_success() {
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        orderService.deleteOrder(orderId);
+        verify(orderRepository).findById(orderId);
+        verify(orderRepository).delete(order);
+        assertThat(order.getItemList()).isEmpty();
+    }
+
+    @Test
+    void deleteOrder_orderNotFound_throwsException() {
+        when(orderRepository.findById(orderId)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> orderService.deleteOrder(orderId))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("httpStatus", HttpStatus.NOT_FOUND);
+        verify(orderRepository).findById(orderId);
+        verify(orderRepository, never()).delete(any());
+    }
+
+    @Test
+    @SneakyThrows
+    void updateOrder_removeOneItemAndAddNew_success() {
+        UUID newItemId = UUID.randomUUID();
+        Item newItem = Item.builder()
+                .id(newItemId)
+                .title("Новый товар")
+                .description("Описание нового товара")
+                .quantity(5L)
+                .price(new BigDecimal(2000))
+                .discountPrice(new BigDecimal(1500))
+                .build();
+        ItemDto newItemDto = ItemDto.builder()
+                .id(newItemId)
+                .title("Новый товар")
+                .description("Описание нового товара")
+                .quantity(5L)
+                .price(new BigDecimal(2000))
+                .discountPrice(new BigDecimal(1500))
+                .build();
+        CartItemDto existingItemDto = CartItemDto.builder()
+                .id(UUID.randomUUID())
+                .item(itemDto1)
+                .addedAt(Instant.now())
+                .build();
+        CartItemDto newCartItemDto = CartItemDto.builder()
+                .id(UUID.randomUUID())
+                .item(newItemDto)
+                .addedAt(Instant.now())
+                .build();
+        List<CartItemDto> updatedItems = Arrays.asList(existingItemDto, newCartItemDto);
+        UpdateOrderDto updateOrderDto = UpdateOrderDto.builder()
+                .orderId(orderId)
+                .items(updatedItems)
+                .build();
+
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(itemRepository.findById(itemDto1.getId())).thenReturn(Optional.of(item1));
+        when(itemRepository.findById(newItemId)).thenReturn(Optional.of(newItem));
+        when(orderItemRepository.save(any(OrderItem.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(orderRepository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(receiptGenerateService.createReceipt(any(OrderDto.class))).thenReturn("pdf/receipt/url");
+        doNothing().when(mailService).sendEmailWithAttachment(any(), any(), any(), any());
+
+        OrderDto result = orderService.updateOrder(updateOrderDto);
+
+        verify(orderRepository).findById(orderId);
+
+        ArgumentCaptor<List<OrderItem>> removedItemsCaptor = ArgumentCaptor.forClass((Class) List.class);
+        verify(orderItemRepository).deleteAll(removedItemsCaptor.capture());
+        List<OrderItem> removedItems = removedItemsCaptor.getValue();
+        assertThat(removedItems).hasSize(1);
+        assertThat(removedItems.get(0).getItem().getId()).isEqualTo(item2.getId());
+
+        verify(itemRepository).save(argThat(item ->
+                item.getId().equals(newItemId) && item.getQuantity() == 4L
+        ));
+
+        verify(orderRepository).save(orderCaptor.capture());
+        Order capturedOrder = orderCaptor.getValue();
+
+        BigDecimal expectedTotal = item1.getPrice().add(newItem.getPrice()); // 10000 + 2000 = 12000
+        BigDecimal expectedDiscount = item1.getDiscountPrice().add(newItem.getDiscountPrice()); // 5000 + 1500 = 6500
+
+        assertThat(capturedOrder.getTotalCost()).isEqualByComparingTo(expectedTotal);
+        assertThat(capturedOrder.getDiscountCost()).isEqualByComparingTo(expectedDiscount);
+        assertThat(capturedOrder.getItemList()).hasSize(2);
+        assertThat(capturedOrder.getUpdatedAt()).isNotNull();
+
+        verify(mailService).sendEmailWithAttachment(
+                eq(profile.getEmail()),
+                eq("Оформление заказа"),
+                eq("Здравствуйте, Ivan Ivanov.\n" +
+                        "Ваш заказ был изменен и ожидает оплаты.\n\nС уважением,\nИнтернет-магазин"),
+                eq("pdf/receipt/url")
+        );
+        assertThat(result).isNotNull();
+    }
+
+    @Test
+    void updateOrder_removeAllItems_throwsException() {
+        UpdateOrderDto updateOrderDto = UpdateOrderDto.builder()
+                .orderId(orderId)
+                .items(Collections.emptyList())
+                .build();
+
+
+        assertThatThrownBy(() -> orderService.updateOrder(updateOrderDto))
+                .isInstanceOf(BusinessException.class);
+        verify(orderRepository, never()).findById(orderId);
+        verify(orderItemRepository, never()).deleteAll(any());
+        verify(itemRepository, never()).save(any());
+        verify(orderRepository, never()).save(any());
+    }
+
+    @Test
+    void updateOrder_orderNotFound_throwsException() {
+        UpdateOrderDto updateOrderDto = UpdateOrderDto.builder()
+                .orderId(orderId)
+                .items(Arrays.asList(
+                        CartItemDto.builder().item(itemDto1).build()
+                ))
+                .build();
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> orderService.updateOrder(updateOrderDto))
+                .isInstanceOf(BusinessException.class);
+
+        verify(orderRepository).findById(orderId);
+        verifyNoInteractions(itemRepository, orderItemRepository, mailService, receiptGenerateService);
+    }
+
+    @Test
+    void updateOrder_newItemNotFound_throwsException() {
+        UUID nonExistentItemId = UUID.randomUUID();
+        CartItemDto newItemDto = CartItemDto.builder()
+                .id(nonExistentItemId)
+                .item(ItemDto.builder().id(nonExistentItemId).build())
+                .build();
+
+        UpdateOrderDto updateOrderDto = UpdateOrderDto.builder()
+                .orderId(orderId)
+                .items(Arrays.asList(
+                        CartItemDto.builder().item(itemDto1).build(),
+                        newItemDto
+                ))
+                .build();
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(itemRepository.findById(itemDto1.getId())).thenReturn(Optional.of(item1));
+        when(itemRepository.findById(nonExistentItemId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> orderService.updateOrder(updateOrderDto))
+                .isInstanceOf(BusinessException.class);
+
+        verify(orderRepository).findById(orderId);
+        verify(itemRepository).findById(nonExistentItemId);
+
+        verify(orderItemRepository, never()).deleteAll(any());
+        verify(orderRepository, never()).save(any());
+    }
+
+    @Test
+    void updateOrder_newItemOutOfStock_throwsException() {
+        UUID newItemId = UUID.randomUUID();
+        Item newItem = Item.builder()
+                .id(newItemId)
+                .title("Новый товар")
+                .description("Описание нового товара")
+                .quantity(0L)
+                .price(new BigDecimal(2000))
+                .discountPrice(new BigDecimal(1500))
+                .build();
+        ItemDto newItemDto = ItemDto.builder()
+                .id(newItemId)
+                .title("Новый товар")
+                .description("Описание нового товара")
+                .quantity(5L)
+                .price(new BigDecimal(2000))
+                .discountPrice(new BigDecimal(1500))
+                .build();
+        CartItemDto existingItemDto = CartItemDto.builder()
+                .id(UUID.randomUUID())
+                .item(itemDto1)
+                .addedAt(Instant.now())
+                .build();
+        CartItemDto newCartItemDto = CartItemDto.builder()
+                .id(UUID.randomUUID())
+                .item(newItemDto)
+                .addedAt(Instant.now())
+                .build();
+        List<CartItemDto> updatedItems = Arrays.asList(existingItemDto, newCartItemDto);
+        UpdateOrderDto updateOrderDto = UpdateOrderDto.builder()
+                .orderId(orderId)
+                .items(updatedItems)
+                .build();
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(itemRepository.findById(itemDto1.getId())).thenReturn(Optional.of(newItem));
+
+        assertThatThrownBy(() -> orderService.updateOrder(updateOrderDto))
+                .isInstanceOf(BusinessException.class);
+
+        verify(orderRepository).findById(orderId);
+        verify(itemRepository).findById(newItem.getId());
+        verify(orderItemRepository, never()).deleteAll(any());
+        verify(itemRepository, never()).save(any());
+        verify(orderRepository, never()).save(any());
+    }
+
+    @Test
+    @SneakyThrows
+    void updateOrder_emailSendingFails_throwsException() {
+        CartItemDto existingItemDto = CartItemDto.builder()
+                .id(UUID.randomUUID())
+                .item(itemDto1)
+                .build();
+
+        UpdateOrderDto updateOrderDto = UpdateOrderDto.builder()
+                .orderId(orderId)
+                .items(Collections.singletonList(existingItemDto))
+                .build();
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(itemRepository.findById(itemDto1.getId())).thenReturn(Optional.of(item1));
+        when(orderRepository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(receiptGenerateService.createReceipt(any(OrderDto.class))).thenReturn("receipt/url");
+        doThrow(new MessagingException("SMTP error")).when(mailService)
+                .sendEmailWithAttachment(any(), any(), any(), any());
+
+        assertThatThrownBy(() -> orderService.updateOrder(updateOrderDto))
+                .isInstanceOf(BusinessException.class);
+
+        verify(orderRepository).save(any());
+        verify(receiptGenerateService).createReceipt(any());
+        verify(mailService).sendEmailWithAttachment(any(), any(), any(), any());
     }
 }
