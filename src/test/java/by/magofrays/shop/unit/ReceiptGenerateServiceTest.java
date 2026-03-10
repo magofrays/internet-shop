@@ -1,4 +1,4 @@
-package by.magofrays.shop.unittest;
+package by.magofrays.shop.unit.test;
 
 import by.magofrays.shop.dto.OrderDto;
 import by.magofrays.shop.dto.ReadProfileDto;

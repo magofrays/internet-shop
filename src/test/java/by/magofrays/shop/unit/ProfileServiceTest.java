@@ -1,4 +1,4 @@
-package by.magofrays.shop.unittest;
+package by.magofrays.shop.unit.test;
 
 import by.magofrays.shop.dto.CartDto;
 import by.magofrays.shop.dto.OrderDto;
@@ -18,7 +18,6 @@ import by.magofrays.shop.service.ProfileService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;

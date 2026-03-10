@@ -1,4 +1,4 @@
-package by.magofrays.shop.unittest;
+package by.magofrays.shop.unit.test;
 
 import by.magofrays.shop.dto.*;
 import by.magofrays.shop.entity.*;
@@ -9,7 +9,6 @@ import by.magofrays.shop.service.MailService;
 import by.magofrays.shop.service.OrderService;
 import by.magofrays.shop.service.ReceiptGenerateService;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +23,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import javax.mail.MessagingException;
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;

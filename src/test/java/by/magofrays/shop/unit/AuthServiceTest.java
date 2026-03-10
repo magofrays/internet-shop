@@ -1,4 +1,4 @@
-package by.magofrays.shop.unittest;
+package by.magofrays.shop.unit.test;
 
 
 import by.magofrays.shop.configuration.security.JwtUtils;
