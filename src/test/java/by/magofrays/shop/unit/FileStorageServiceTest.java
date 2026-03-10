@@ -1,8 +1,7 @@
-package by.magofrays.shop.unit.test;
+package by.magofrays.shop.unit;
 
 import by.magofrays.shop.exception.BusinessException;
 import by.magofrays.shop.service.FileStorageService;
-import com.sun.org.apache.xpath.internal.operations.Mult;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -152,7 +151,7 @@ public class FileStorageServiceTest {
     @SneakyThrows
     public void updateAndLoadFileTest(){
         Resource file = new ByteArrayResource(
-                "test".getBytes(StandardCharsets.UTF_8)
+                "db/test".getBytes(StandardCharsets.UTF_8)
         ){
             @Override
             public String getFilename(){
@@ -161,14 +160,14 @@ public class FileStorageServiceTest {
         };
         String filename = file.getFilename();
         UUID entityId = UUID.randomUUID();
-        String url = assertDoesNotThrow(() -> fileStorageService.saveFile(file, "test/test", entityId, null));
+        String url = assertDoesNotThrow(() -> fileStorageService.saveFile(file, "db/test/test", entityId, null));
         Path saveDir = tempDir.resolve("save/");
         assertTrue(Files.exists(saveDir.resolve(url)));
         Resource savedFile = fileStorageService.getFileByPath(url);
         assertNotNull(savedFile);
         assertTrue(savedFile.exists());
         assertNotNull(savedFile.getFilename());
-        resourceEqualsTest(savedFile, "test".getBytes(StandardCharsets.UTF_8));
+        resourceEqualsTest(savedFile, "db/test".getBytes(StandardCharsets.UTF_8));
 
         Resource newFile = new ByteArrayResource(
                 "new file".getBytes(StandardCharsets.UTF_8)
@@ -178,7 +177,7 @@ public class FileStorageServiceTest {
                 return "test2.txt";
             }
         };
-        String url2 = assertDoesNotThrow(() -> fileStorageService.saveFile(newFile, "test/test", entityId, url));
+        String url2 = assertDoesNotThrow(() -> fileStorageService.saveFile(newFile, "db/test/test", entityId, url));
         assertFalse(Files.exists(saveDir.resolve(url)));
         assertTrue(Files.exists(saveDir.resolve(url2)));
         Resource savedFile2 = fileStorageService.getFileByPath(url2);

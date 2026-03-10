@@ -3,7 +3,6 @@ package by.magofrays.shop.configuration.security;
 import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +26,7 @@ public class JwtUtils {
         log.debug("Creating jwt token for {}", userDetails.getUsername());
         return Jwts.builder()
                 .claim("id", userDetails.getUsername())
-                .claim("role", userDetails.getAuthorities().stream().findFirst().toString())
+                .claim("role", userDetails.getAuthorities().stream().findFirst().get().toString())
                 .setIssuer(this.getClass().getName())
                 .setIssuedAt(Date.from(Instant.now()))
                 .setExpiration(Date.from(Instant.now().plus(jwtProperties.getExpiresHours(), ChronoUnit.HOURS)))

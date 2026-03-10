@@ -31,14 +31,14 @@ public class ProfileController {
     }
 
     @PreAuthorize("hasAnyAuthority('CLIENT', 'ADMIN')")
-    @GetMapping
+    @GetMapping("cart")
     public ResponseEntity<CartDto> getCart(@AuthenticationPrincipal UserDetails principal){
         UUID profileId = UUID.fromString(principal.getUsername());
         return ResponseEntity.ok(profileService.getCart(profileId));
     }
 
     @PreAuthorize("hasAnyAuthority('CLIENT', 'ADMIN')")
-    @GetMapping
+    @GetMapping("order")
     public ResponseEntity<List<OrderDto>> getOrders(@AuthenticationPrincipal UserDetails principal){
         UUID profileId = UUID.fromString(principal.getUsername());
         return ResponseEntity.ok(profileService.getOrders(profileId));
@@ -65,7 +65,7 @@ public class ProfileController {
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
-    @PutMapping
+    @PutMapping("role")
     public ResponseEntity<ReadProfileDto> updateProfileRole(@AuthenticationPrincipal UserDetails principal,
                                                             @RequestBody Role role){
         UUID profileId = UUID.fromString(principal.getUsername());
@@ -74,7 +74,7 @@ public class ProfileController {
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
-    @GetMapping
+    @GetMapping("allr")
     public ResponseEntity<List<ReadProfileDto>> getAllProfiles(){
         return ResponseEntity.ok(
                 profileService.getAllProfiles()

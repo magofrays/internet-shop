@@ -1,4 +1,4 @@
-package by.magofrays.shop.unit.test;
+package by.magofrays.shop.unit;
 
 import by.magofrays.shop.dto.*;
 import by.magofrays.shop.entity.*;

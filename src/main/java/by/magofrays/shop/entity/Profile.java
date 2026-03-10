@@ -1,6 +1,7 @@
 package by.magofrays.shop.entity;
 
 import lombok.*;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.time.Instant;
@@ -16,10 +17,10 @@ import java.util.UUID;
 @ToString(exclude = {"cart"})
 public class Profile {
     @Id
-    @GeneratedValue
+    @GeneratedValue(generator = "UUID")
     private UUID id;
 
-    @OneToOne(mappedBy = "profile")
+    @OneToOne(mappedBy = "profile", cascade = CascadeType.ALL)
     private Cart cart;
     private String firstName;
     private String lastName;

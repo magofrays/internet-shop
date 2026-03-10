@@ -1,4 +1,4 @@
-package by.magofrays.shop.unit.test;
+package by.magofrays.shop.unit;
 
 
 import by.magofrays.shop.configuration.security.JwtUtils;
@@ -10,6 +10,7 @@ import by.magofrays.shop.entity.Profile;
 import by.magofrays.shop.entity.Role;
 import by.magofrays.shop.exception.BusinessException;
 import by.magofrays.shop.mapper.ProfileMapperImpl;
+import by.magofrays.shop.repository.CartRepository;
 import by.magofrays.shop.repository.ProfileRepository;
 import by.magofrays.shop.service.AuthService;
 import io.jsonwebtoken.Claims;
@@ -18,6 +19,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -52,6 +54,9 @@ public class AuthServiceTest {
     @MockBean
     private SecurityJwtProperties securityJwtProperties;
 
+    @MockBean
+    private CartRepository cartRepository;
+
     @Autowired
     private AuthService authService;
     @Autowired
@@ -62,15 +67,15 @@ public class AuthServiceTest {
     @Test
     public void createProfileTest(){
         CreateProfileDto createUpdateProfileDto = CreateProfileDto.builder()
-                .firstName("test")
-                .lastName("test")
+                .firstName("db/test")
+                .lastName("db/test")
                 .email("test@mail.ru")
                 .password("123")
                 .build();
         Profile profile = Profile.builder()
                 .id(UUID.randomUUID())
-                .firstName("test")
-                .lastName("test")
+                .firstName("db/test")
+                .lastName("db/test")
                 .email("test@mail.ru")
                 .role(Role.CLIENT)
                 .password(passwordEncoder.encode("123"))
@@ -95,15 +100,15 @@ public class AuthServiceTest {
     @Test
     public void createProfileWithErrorTest(){
         CreateProfileDto createProfileDto = CreateProfileDto.builder()
-                .firstName("test")
-                .lastName("test")
+                .firstName("db/test")
+                .lastName("db/test")
                 .email("test@mail.ru")
                 .password("123")
                 .build();
         Profile profile = Profile.builder()
                 .id(UUID.randomUUID())
-                .firstName("test")
-                .lastName("test")
+                .firstName("db/test")
+                .lastName("db/test")
                 .email("test@mail.ru")
                 .role(Role.CLIENT)
                 .cart(Cart.builder()
@@ -120,8 +125,8 @@ public class AuthServiceTest {
         String email = "test@mail.ru";
         Profile profile = Profile.builder()
                 .id(UUID.randomUUID())
-                .firstName("test")
-                .lastName("test")
+                .firstName("db/test")
+                .lastName("db/test")
                 .email("test@mail.ru")
                 .role(Role.CLIENT)
                 .cart(Cart.builder()

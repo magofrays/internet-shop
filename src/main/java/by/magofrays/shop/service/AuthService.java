@@ -8,6 +8,7 @@ import by.magofrays.shop.entity.Profile;
 import by.magofrays.shop.entity.Role;
 import by.magofrays.shop.exception.BusinessException;
 import by.magofrays.shop.mapper.ProfileMapper;
+import by.magofrays.shop.repository.CartRepository;
 import by.magofrays.shop.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,7 @@ public class AuthService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
     private final ProfileMapper profileMapper;
     private final JwtUtils jwtUtils;
+    private final CartRepository cartRepository;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -69,7 +71,8 @@ public class AuthService implements UserDetailsService {
         profile.setPassword(passwordEncoder.encode(createProfileDto.getPassword()));
         Cart cart = new Cart();
         profile.setCart(cart);
-        profileRepository.save(profile);
+        profile = profileRepository.save(profile);
+
         log.info("Created profile: {}", profile.getId());
         return new User(profile.getEmail(), "",
                 Collections.singletonList( new SimpleGrantedAuthority(profile.getRole().name())));
