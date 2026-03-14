@@ -34,18 +34,17 @@ public class AuthService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
     private final ProfileMapper profileMapper;
     private final JwtUtils jwtUtils;
-    private final CartRepository cartRepository;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         log.info("Trying to find profile by email: {}", email);
         return profileRepository.findByEmail(email).map(profile ->
                 new User(
-                        profile.getEmail(),
+                        profile.getId().toString(),
                         profile.getPassword(),
                         Collections.singletonList(new SimpleGrantedAuthority(profile.getRole().name()))
 )                ).orElseThrow(
-                        () -> new BusinessException(HttpStatus.NOT_FOUND)
+                        () -> new BusinessException(HttpStatus.FORBIDDEN, "Profile not found!")
                 );
     }
 
@@ -64,7 +63,7 @@ public class AuthService implements UserDetailsService {
         log.info("Trying to create profile: {}", createProfileDto.getEmail());
         if(profileRepository.findByEmail(createProfileDto.getEmail()).isPresent()){
             log.error("Email {} already taken to create profile", createProfileDto.getEmail());
-            throw new BusinessException(HttpStatus.BAD_REQUEST);
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "Email already exists!");
         }
         Profile profile = profileMapper.toEntity(createProfileDto);
         profile.setRole(Role.CLIENT);
@@ -74,8 +73,7 @@ public class AuthService implements UserDetailsService {
         profile = profileRepository.save(profile);
 
         log.info("Created profile: {}", profile.getId());
-        return new User(profile.getEmail(), "",
+        return new User(profile.getId().toString(), "",
                 Collections.singletonList( new SimpleGrantedAuthority(profile.getRole().name())));
     }
-
 }

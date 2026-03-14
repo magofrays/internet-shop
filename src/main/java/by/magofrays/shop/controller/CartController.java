@@ -24,8 +24,9 @@ public class CartController {
             @RequestBody UUID itemId,
             @AuthenticationPrincipal UserDetails principal){
         UUID profileId = UUID.fromString(principal.getUsername());
+        CartItemDto cartItemDto = cartService.addItemIntoCart(itemId, profileId);
         return ResponseEntity.ok(
-                cartService.addItemIntoCart(itemId, profileId)
+                cartItemDto
         );
     }
 

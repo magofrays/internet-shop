@@ -28,7 +28,8 @@ public class CartService {
     private final ItemRepository itemRepository;
 
     public List<CartItemDto> getItemsInCart(UUID profileId){
-        Profile profile = profileRepository.findById(profileId).orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+        Profile profile = profileRepository.findById(profileId).orElseThrow(
+                () -> new BusinessException(HttpStatus.NOT_FOUND, "Profile not found!"));
         return profile.getCart()
                 .getItemList().stream()
                 .map(cartItemMapper::toDto)
@@ -38,9 +39,9 @@ public class CartService {
     @Transactional
     public CartItemDto addItemIntoCart(UUID itemId, UUID profileId){
         Profile profile = profileRepository.findById(profileId)
-                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Profile not found!"));
         Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Item not found!"));
         Cart cart = profile.getCart();
         CartItem cartItem = createCartItem(cart, item);
         cart.getItemList().add(cartItem);
@@ -50,13 +51,13 @@ public class CartService {
     @Transactional
     public void removeItemFromCart(UUID cartItemId, UUID profileId){
         Profile profile = profileRepository.findById(profileId)
-                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Profile not found!"));
         Cart cart = profile.getCart();
         List<CartItem> items = cart.getItemList();
         CartItem cartItem = cartItemRepository.findById(cartItemId).
-                orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+                orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Item not found in cart!"));
         if(!items.contains(cartItem)){
-            throw new BusinessException(HttpStatus.BAD_REQUEST);
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "Cart does not contain item!");
         }
         items.remove(cartItem);
         cartItemRepository.delete(cartItem);
@@ -69,8 +70,4 @@ public class CartService {
                         .item(item)
                         .build());
     }
-
-
-
-
 }

@@ -28,7 +28,7 @@ public class ItemService {
     public ItemDto createItem(ItemDto itemDto, MultipartFile image){
         log.debug("Creating item: {}", itemDto.getTitle());
         if(itemDto.getDiscountPrice() != null &&  itemDto.getDiscountPrice().compareTo(itemDto.getPrice()) > 0){
-            throw new BusinessException(HttpStatus.BAD_REQUEST);
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "Discount price must be lower than price!");
         }
         Item item = itemMapper.toEntity(itemDto);
         item.setId(UUID.randomUUID());
@@ -49,18 +49,20 @@ public class ItemService {
     }
 
     public void setImageForItemId(UUID itemId, MultipartFile image){
-        Item item = itemRepository.findById(itemId).orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Item not found!"));
         setImageForItem(item, image);
     }
 
     public void deleteItemImage(UUID itemId){
         String url = itemRepository.findById(itemId).orElseThrow(
-                () -> new BusinessException(HttpStatus.NOT_FOUND)).getImageUrl();
+                () -> new BusinessException(HttpStatus.NOT_FOUND, "Item not found!")).getImageUrl();
         fileStorageService.deleteFileForEntity(url, itemId);
     }
 
     public void deleteItem(UUID itemId){
-        Item item = itemRepository.findById(itemId).orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Item not found!"));
         try{
             deleteItemImage(itemId);
         }catch (BusinessException be){
@@ -72,12 +74,13 @@ public class ItemService {
     public ItemDto updateItem(ItemDto itemDto, MultipartFile image){
         log.debug("Updating item: {}", itemDto.getId());
         if(itemDto.getId() == null){
-            throw new BusinessException(HttpStatus.BAD_REQUEST);
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "Item not found!");
         }
         if(itemDto.getDiscountPrice() != null &&  itemDto.getDiscountPrice().compareTo(itemDto.getPrice()) > 0){
-            throw new BusinessException(HttpStatus.BAD_REQUEST);
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "Discount price must be lower than price!");
         }
-        Item item = itemRepository.findById(itemDto.getId()).orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+        Item item = itemRepository.findById(itemDto.getId()).orElseThrow(
+                () -> new BusinessException(HttpStatus.NOT_FOUND, "Item not found!"));
         item.setPrice(itemDto.getPrice());
         item.setTitle(itemDto.getTitle());
         item.setDescription(itemDto.getDescription());
@@ -99,7 +102,7 @@ public class ItemService {
         return itemMapper.toDto(
                 itemRepository
                         .findById(itemId).orElseThrow(
-                                () -> new BusinessException(HttpStatus.NOT_FOUND)
+                                () -> new BusinessException(HttpStatus.NOT_FOUND, "Item not found!")
                         ));
     }
 
@@ -111,9 +114,10 @@ public class ItemService {
     }
 
     public Resource getItemImage(UUID itemId){
-        Item item = itemRepository.findById(itemId).orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Item not found!"));
         if(item.getImageUrl() == null){
-            throw new BusinessException(HttpStatus.NOT_FOUND);
+            throw new BusinessException(HttpStatus.NOT_FOUND, "Item does not have image!");
         }
         return fileStorageService.getFileByPath(item.getImageUrl());
     }

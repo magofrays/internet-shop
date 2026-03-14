@@ -15,6 +15,7 @@ import by.magofrays.shop.repository.OrderRepository;
 import by.magofrays.shop.repository.ProfileRepository;
 import by.magofrays.shop.service.OrderService;
 import by.magofrays.shop.service.ProfileService;
+import by.magofrays.shop.utils.LocalStorageTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

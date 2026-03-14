@@ -5,6 +5,7 @@ import by.magofrays.shop.dto.LoginDto;
 import by.magofrays.shop.dto.LoginResponse;
 import by.magofrays.shop.service.AuthService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,20 +27,21 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
 
     @PostMapping("/sign-in")
-    public LoginResponse signIn(@RequestBody @Validated LoginDto loginDto){
+    public ResponseEntity<LoginResponse> signIn(@RequestBody @Validated LoginDto loginDto){
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword())
         );
         SecurityContextHolder.getContext().setAuthentication(auth);
         UserDetails details = (UserDetails) auth.getPrincipal();
-        return authService.createLoginResponse(details);
+        return ResponseEntity.ok(authService.createLoginResponse(details));
     }
 
     @PostMapping("/sign-up")
-    public LoginResponse signUp(@RequestBody @Validated CreateProfileDto createProfileDto){
-        return authService.createLoginResponse(
+    public ResponseEntity<LoginResponse> signUp(@RequestBody @Validated CreateProfileDto createProfileDto){
+        return
+                ResponseEntity.ok(authService.createLoginResponse(
                 authService
-                        .createProfile(createProfileDto)
+                        .createProfile(createProfileDto))
         );
     }
 

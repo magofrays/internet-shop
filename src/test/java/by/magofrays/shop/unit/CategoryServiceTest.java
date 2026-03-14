@@ -9,6 +9,7 @@ import by.magofrays.shop.mapper.ItemMapperImpl;
 import by.magofrays.shop.repository.CategoryRepository;
 import by.magofrays.shop.repository.ItemRepository;
 import by.magofrays.shop.service.CategoryService;
+import by.magofrays.shop.utils.LocalStorageTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

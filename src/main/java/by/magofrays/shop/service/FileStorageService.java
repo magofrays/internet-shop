@@ -94,13 +94,13 @@ public class FileStorageService {
         log.info("Trying to delete file: {} for entity: {}", url, entityId);
         Object fileLock = fileLocks.computeIfAbsent(entityId, k -> new Object());
         if(url == null){
-            throw new BusinessException(HttpStatus.BAD_REQUEST);
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "File not found!");
         }
         Path path = baseUploadPath.resolve(url);
         synchronized (fileLock){
             if(!Files.exists(path)){
                 log.warn("No file found for path {} for entity {}", path, entityId);
-                throw new BusinessException(HttpStatus.NOT_FOUND);
+                throw new BusinessException(HttpStatus.NOT_FOUND, "File not found!");
             }
             deleteFile(path);
         }
@@ -129,28 +129,29 @@ public class FileStorageService {
     public void validateImageFile(MultipartFile file) {
         if (file.isEmpty()) {
             log.warn("File is empty to save image.");
-            throw new BusinessException(HttpStatus.BAD_REQUEST);
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "File is empty!");
         }
 
         if (file.getSize() > maxFileSize.toBytes()) {
             log.warn("File is too big to save image.");
-            throw new BusinessException(HttpStatus.BAD_REQUEST);
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "File is too big!");
         }
 
         String contentType = file.getContentType();
         if (contentType == null || !contentType.startsWith("image/")) {
             log.warn("File is not image.");
-            throw new BusinessException(HttpStatus.BAD_REQUEST);
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "File is not image!");
         }
         if(file.getOriginalFilename() == null){
             log.warn("No file name.");
-            throw new BusinessException(HttpStatus.BAD_REQUEST);
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "No file name!");
         }
         String extension = getFileExtension(file.getOriginalFilename());
         if (!allowedExtensions.contains(extension.toLowerCase())) {
             log.warn("Bad file extension. Probably not image.");
             throw new BusinessException(
-                    HttpStatus.BAD_REQUEST
+                    HttpStatus.BAD_REQUEST,
+                    "Bad file extension. Probably not image!"
             );
         }
     }
@@ -170,7 +171,8 @@ public class FileStorageService {
         log.info("Trying to get file by path: {}", path);
         if(path == null){
             log.error("Path is empty");
-            throw new BusinessException(HttpStatus.BAD_REQUEST);
+            throw new BusinessException(HttpStatus.BAD_REQUEST,
+                    "File not found!");
         }
 
         Path uploadPath = baseUploadPath.resolve(path);
@@ -182,7 +184,7 @@ public class FileStorageService {
             return new FileSystemResource(savePath.toFile());
         }
         log.error("Path {} is wrong", path);
-        throw new BusinessException(HttpStatus.NOT_FOUND);
+        throw new BusinessException(HttpStatus.NOT_FOUND, "File not found!");
     }
 
 }

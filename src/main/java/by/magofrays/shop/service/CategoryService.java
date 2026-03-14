@@ -36,11 +36,13 @@ public class CategoryService {
 
     @Transactional
     public ItemDto addItemIntoCatalogue(AddRemoveItemDto addItemDto){
-        Category catalogue = categoryRepository.findById(addItemDto.getPositionId()).orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+        Category catalogue = categoryRepository.findById(addItemDto.getPositionId())
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Category not found!"));
         if(!catalogue.getCategoryList().isEmpty()){
-            throw new BusinessException(HttpStatus.BAD_REQUEST);
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "There are categories in catalogue!");
         }
-        Item item = itemRepository.findById(addItemDto.getItemId()).orElseThrow(() ->new BusinessException(HttpStatus.NOT_FOUND));
+        Item item = itemRepository.findById(addItemDto.getItemId()).orElseThrow(
+                () ->new BusinessException(HttpStatus.NOT_FOUND, "Item not found!"));
         catalogue.addItem(item);
         return itemMapper.toDto(itemRepository.save(item));
     }
@@ -48,13 +50,13 @@ public class CategoryService {
     @Transactional
     public ItemDto removeItemFromCatalogue(AddRemoveItemDto removeItemDto){
         Item item = itemRepository.findById(removeItemDto.getItemId())
-                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Item not found!"));
         Category catalogue = categoryRepository
                 .findById(removeItemDto.getPositionId())
-                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Category not found!"));
         List<Item> items = catalogue.getItemList();
         if(!items.contains(item)){
-            throw new BusinessException(HttpStatus.BAD_REQUEST);
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "Item not found!");
         }
         items.remove(item);
         item.getCategories().remove(catalogue);
@@ -72,9 +74,9 @@ public class CategoryService {
         } else {
             Category parentCatalogue = categoryRepository
                     .findById(createCategoryDto.getParentCatalogueId())
-                    .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+                    .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Category not found!"));
             if(!parentCatalogue.getItemList().isEmpty()){
-                throw new BusinessException(HttpStatus.BAD_REQUEST);
+                throw new BusinessException(HttpStatus.BAD_REQUEST, "parentCatalogue contains items!");
             }
             Category category = categoryMapper.toEntity(createCategoryDto);
             categoryRepository.save(category);
@@ -87,12 +89,12 @@ public class CategoryService {
     public CategoryDto updateCatalogue(CreateUpdateCategoryDto updateCategoryDto){
         Category category = categoryRepository
                 .findById(updateCategoryDto.getId())
-                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Category not found!"));
         Category parentCatalogue = category.getParentCatalogue();
         if(parentCatalogue.getId() != updateCategoryDto.getParentCatalogueId()){
             Category newParent = categoryRepository
                     .findById(updateCategoryDto.getParentCatalogueId())
-                    .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+                    .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "parentCatalogue not found!"));
             parentCatalogue.getCategoryList().remove(category);
             newParent.addChildCatalogue(category);
         }
@@ -104,7 +106,7 @@ public class CategoryService {
 
     public FullCategoryDto getCatalogueTree(UUID catalogueId){
         Category catalogue = categoryRepository.findById(catalogueId).orElseThrow(
-                () -> new BusinessException(HttpStatus.NOT_FOUND)
+                () -> new BusinessException(HttpStatus.NOT_FOUND, "Category not found!")
         );
         return categoryMapper.toFullDto(catalogue);
     }
@@ -122,7 +124,8 @@ public class CategoryService {
 
     @Transactional
     public void deleteCatalogueById(UUID categoryId){
-        Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Category not found!"));
         deleteCategory(category);
     }
 
@@ -130,7 +133,7 @@ public class CategoryService {
     public List<CategoryDto> getCategoriesByParentCategory(UUID categoryId){
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(
-                        () -> new BusinessException(HttpStatus.NOT_FOUND)
+                        () -> new BusinessException(HttpStatus.NOT_FOUND, "Category not found!")
                 );
         return category.getCategoryList().stream()
                 .map(categoryMapper::toDto)

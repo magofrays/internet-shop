@@ -40,14 +40,15 @@ public class ProfileService {
 
     public List<OrderDto> getOrders(UUID profileId){
         if(!profileRepository.existsProfileById(profileId)){
-            throw new BusinessException(HttpStatus.NOT_FOUND);
+            throw new BusinessException(HttpStatus.NOT_FOUND, "Profile not found!");
         }
         return orderRepository.findByCreatedBy_Id(profileId).stream().map(orderMapper::toDto).collect(Collectors.toList());
     }
 
     public CartDto getCart(UUID profileId){
         log.info("Getting cart for profile: {}", profileId);
-        Profile profile = profileRepository.findById(profileId).orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+        Profile profile = profileRepository.findById(profileId)
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Profile not found!"));
         Cart cart = profile.getCart();
         return cartMapper.toDto(cart);
     }
@@ -55,12 +56,12 @@ public class ProfileService {
     public ReadProfileDto getProfileInfo(UUID profileId){
         log.info("Getting profile info for profile: {}", profileId);
         return profileMapper.toDto(profileRepository.findById(profileId).orElseThrow(
-                () -> new BusinessException(HttpStatus.NOT_FOUND)));
+                () -> new BusinessException(HttpStatus.NOT_FOUND, "Profile not found!")));
     }
 
     public ReadProfileDto updateProfile(UpdateProfileDto updateProfileDto){
         Profile profile = profileRepository.findById(updateProfileDto.getId())
-                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Profile not found!"));
         profile.setFirstName(updateProfileDto.getFirstname());
         profile.setLastName(updateProfileDto.getLastname());
         profile.setUpdatedAt(Instant.now());
@@ -70,7 +71,7 @@ public class ProfileService {
 
     public ReadProfileDto updateProfileRole(UUID profileId, Role role){
         Profile profile = profileRepository.findById(profileId)
-                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Profile not found!"));
         profile.setRole(role);
         profile = profileRepository.save(profile);
         return profileMapper.toDto(profile);
@@ -79,7 +80,8 @@ public class ProfileService {
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void deleteProfile(UUID profileId){
         log.info("Deleting profile: {}", profileId);
-        Profile profile = profileRepository.findById(profileId).orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+        Profile profile = profileRepository.findById(profileId)
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Profile not found!"));
         Cart cart = profile.getCart();
         cart.getItemList().clear();
         cartRepository.delete(cart);
@@ -95,7 +97,8 @@ public class ProfileService {
         return profileMapper.toDto(
                 profileRepository
                         .findById(profileId)
-                        .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND))
+                        .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND,
+                                "Profile not found!"))
         );
     }
 

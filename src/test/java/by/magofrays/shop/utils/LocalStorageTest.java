@@ -1,4 +1,4 @@
-package by.magofrays.shop.unit;
+package by.magofrays.shop.utils;
 
 import by.magofrays.shop.dto.*;
 import by.magofrays.shop.entity.*;

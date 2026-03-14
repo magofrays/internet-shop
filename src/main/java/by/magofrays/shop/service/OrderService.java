@@ -38,10 +38,10 @@ public class OrderService {
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public OrderDto createOrder(List<CartItemDto> items, UUID profileId){
         if(items.isEmpty()){
-            throw new BusinessException(HttpStatus.BAD_REQUEST);
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "Can't create order with empty items!");
         }
         Profile profile = profileRepository.findById(profileId).orElseThrow(
-                () -> new BusinessException(HttpStatus.NOT_FOUND)
+                () -> new BusinessException(HttpStatus.NOT_FOUND, "Profile not found!")
         );
         Order order = Order.builder()
                 .createdBy(profile)
@@ -52,10 +52,10 @@ public class OrderService {
         BigDecimal discountPrice = new BigDecimal(0);
         for(CartItemDto itemDto : items){
             CartItem cartItem = cartItemRepository.findById(itemDto.getId())
-                    .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+                    .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Item not found in cart!"));
             Item item = cartItem.getItem();
             if(item.getQuantity() == 0){
-                throw new BusinessException(HttpStatus.BAD_REQUEST);
+                throw new BusinessException(HttpStatus.BAD_REQUEST, "No such item in shop!");
             }
             item.setQuantity(item.getQuantity()-1);
             itemRepository.save(item);
@@ -84,7 +84,7 @@ public class OrderService {
                     message + "\n\nС уважением,\nИнтернет-магазин",
                     receiptUrl);
         } catch (MessagingException messagingException){
-            throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR, "Can't send email!");
         }
     }
 
@@ -100,14 +100,14 @@ public class OrderService {
     @Transactional
     public OrderDto getOrderById(UUID id){
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Order not found!"));
         return orderMapper.toDto(order);
     }
 
     @Transactional(isolation = Isolation.REPEATABLE_READ) // system changes
     public OrderDto updateOrderStatus(UpdateOrderStatus orderStatus){
         Order order = orderRepository.findById(orderStatus.getOrderId())
-                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Order not found!"));
         order.setOrderStatus(orderStatus.getOrderStatus());
         orderRepository.save(order);
         return orderMapper.toDto(order);
@@ -121,7 +121,7 @@ public class OrderService {
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void deleteOrder(UUID orderId){
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Order not found!"));
         order.getItemList().clear();
         orderRepository.delete(order);
     }
@@ -129,10 +129,10 @@ public class OrderService {
     @Transactional(isolation = Isolation.REPEATABLE_READ) // client changes
     public OrderDto updateOrder(UpdateOrderDto orderDto) {
         if(orderDto.getItems().isEmpty()){
-            throw new BusinessException(HttpStatus.BAD_REQUEST);
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "Can't update order request has empty items!");
         }
         Order order = orderRepository.findById(orderDto.getOrderId())
-                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Order not found!"));
         Profile profile = order.getCreatedBy();
         List<CartItemDto> cartItems = orderDto.getItems();
         List<OrderItem> removalItems = new ArrayList<>();
@@ -158,9 +158,9 @@ public class OrderService {
                continue;
             }
             Item item = itemRepository.findById(addItem.getItem().getId())
-                    .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND));
+                    .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Item not found!"));
             if(item.getQuantity() == 0){
-                throw new BusinessException(HttpStatus.BAD_REQUEST);
+                throw new BusinessException(HttpStatus.BAD_REQUEST, "No such item in shop!");
             }
             item.setQuantity(item.getQuantity()-1);
             itemRepository.save(item);

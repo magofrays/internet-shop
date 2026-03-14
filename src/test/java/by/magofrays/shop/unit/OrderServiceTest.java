@@ -8,6 +8,7 @@ import by.magofrays.shop.repository.*;
 import by.magofrays.shop.service.MailService;
 import by.magofrays.shop.service.OrderService;
 import by.magofrays.shop.service.ReceiptGenerateService;
+import by.magofrays.shop.utils.LocalStorageTest;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
