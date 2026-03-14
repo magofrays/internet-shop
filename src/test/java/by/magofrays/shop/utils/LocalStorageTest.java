@@ -5,6 +5,7 @@ import by.magofrays.shop.entity.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.UUID;
@@ -175,4 +176,80 @@ public class LocalStorageTest {
             .createdAt(orderDto.getCreatedAt())
             .updatedAt(orderDto.getUpdatedAt())
             .build();
+    public Category rootCategory = Category.builder()
+            .id(UUID.randomUUID())
+            .title("Электротехника")
+            .description("Бытовая техника и электроника")
+            .createdAt(Instant.now().minus(1, ChronoUnit.DAYS))
+            .updatedAt(Instant.now().minus(1, ChronoUnit.DAYS))
+            .build();
+    public Category category1 = Category.builder()
+            .id(UUID.randomUUID())
+            .title("Электроника")
+            .parentCatalogue(rootCategory)
+            .description("Различная электроника")
+            .createdAt(Instant.now().minus(1, ChronoUnit.DAYS))
+            .updatedAt(Instant.now().minus(1, ChronoUnit.DAYS))
+            .build();
+
+    public Category categoryKid1 = Category.builder()
+            .id(UUID.randomUUID())
+            .title("Компьютерная техника")
+            .description("Аксессуары и компьютерная техника")
+            .parentCatalogue(category1)
+            .createdAt(Instant.now().minus(1, ChronoUnit.DAYS))
+            .updatedAt(Instant.now().minus(1, ChronoUnit.DAYS))
+            .build();
+    {
+        categoryKid1.getItemList().addAll(Arrays.asList(item1, item2));
+        category1.getCategoryList().add(categoryKid1);
+        rootCategory.getCategoryList().add(category1);
+    }
+
+    public CategoryDto rootCategoryDto = CategoryDto.builder()
+            .id(rootCategory.getId())
+            .description(rootCategory.getDescription())
+            .title(rootCategory.getTitle())
+            .build();
+
+    public CategoryDto category1Dto = CategoryDto.builder()
+            .id(category1.getId())
+            .title(category1.getTitle())
+            .description(category1.getDescription())
+            .build();
+    public CategoryDto categoryKid1Dto = CategoryDto.builder()
+            .id(categoryKid1.getId())
+            .title(categoryKid1.getTitle())
+            .description(categoryKid1.getDescription())
+            .build();
+
+    public FullCategoryDto fullRootCategoryDto = FullCategoryDto.builder()
+            .id(rootCategory.getId())
+            .title(rootCategory.getTitle())
+            .description(rootCategory.getDescription())
+            .createdAt(rootCategory.getCreatedAt())
+            .updatedAt(rootCategory.getUpdatedAt())
+            .build();
+
+    public FullCategoryDto fullCategory1Dto = FullCategoryDto.builder()
+            .id(category1.getId())
+            .title(category1.getTitle())
+            .description(category1Dto.getDescription())
+            .createdAt(category1.getCreatedAt())
+            .updatedAt(category1.getUpdatedAt())
+            .build();
+
+    public FullCategoryDto fullCategoryKid1Dto = FullCategoryDto.builder()
+            .id(categoryKid1.getId())
+            .title(categoryKid1.getTitle())
+            .description(categoryKid1.getDescription())
+            .createdAt(categoryKid1.getCreatedAt())
+            .updatedAt(categoryKid1.getUpdatedAt())
+            .build();
+
+    {
+        fullCategoryKid1Dto.getItemList().addAll(Arrays.asList(itemDto1, itemDto2));
+        fullCategory1Dto.getCategoryList().add(fullCategoryKid1Dto);
+        fullRootCategoryDto.getCategoryList().add(fullCategory1Dto);
+    }
 }

@@ -1,4 +1,4 @@
 package by.magofrays.shop.validation;
 
-public class UpdateGroup {
+public interface UpdateGroup {
 }
