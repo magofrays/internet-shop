@@ -3,6 +3,7 @@ package by.magofrays.shop.service;
 import by.magofrays.shop.dto.OrderDto;
 import by.magofrays.shop.entity.OrderReceipt;
 import by.magofrays.shop.repository.OrderReceiptRepository;
+import com.lowagie.text.pdf.BaseFont;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -62,6 +63,7 @@ public class ReceiptGenerateService {
     private byte[] convertHtmlToPdf(String html) {
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             ITextRenderer renderer = new ITextRenderer();
+
             renderer.setDocumentFromString(html);
             renderer.layout();
             renderer.createPDF(os);

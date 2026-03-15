@@ -5,6 +5,7 @@ import by.magofrays.shop.entity.Item;
 import by.magofrays.shop.service.ItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -22,10 +23,10 @@ public class ItemController {
     private final ItemService itemService;
 
     @PreAuthorize("hasAuthority('ADMIN')")
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ItemDto> createItem(
             @RequestPart("item") @Validated ItemDto itemDto,
-            @RequestParam("image") MultipartFile image){
+            @RequestParam(value = "image", required = false) MultipartFile image){
         return ResponseEntity.ok(itemService.createItem(itemDto, image));
     }
 
@@ -55,21 +56,21 @@ public class ItemController {
     @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping
     public ResponseEntity<ItemDto> updateItem(
-            @RequestPart ItemDto itemDto,
-            @RequestParam MultipartFile image
+            @RequestPart("item") ItemDto itemDto,
+            @RequestParam(value = "image", required = false) MultipartFile image
     ){
         ItemDto result = itemService.updateItem(itemDto, image);
         return ResponseEntity.ok(result);
     }
 
-    @PreAuthorize("hasAnyAuthority('CLIENT', 'ADMIN')")
+    @PreAuthorize("isAnonymous() || hasAnyAuthority('CLIENT', 'ADMIN')")
     @GetMapping("/{itemId}")
     public ResponseEntity<ItemDto> getItemById(@PathVariable UUID itemId){
         ItemDto result = itemService.findById(itemId);
         return ResponseEntity.ok(result);
     }
 
-    @PreAuthorize("hasAnyAuthority('CLIENT', 'ADMIN')")
+    @PreAuthorize("isAnonymous() || hasAnyAuthority('CLIENT', 'ADMIN')")
     @GetMapping
     public ResponseEntity<List<ItemDto>> getItems(){
         return ResponseEntity.ok(
@@ -77,7 +78,7 @@ public class ItemController {
         );
     }
 
-    @PreAuthorize("hasAnyAuthority('CLIENT', 'ADMIN')")
+    @PreAuthorize("isAnonymous() || hasAnyAuthority('CLIENT', 'ADMIN')")
     @GetMapping("/image/{itemId}")
     public ResponseEntity<Resource> getItemImage(@PathVariable UUID itemId){
         return ResponseEntity.ok(

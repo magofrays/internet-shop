@@ -18,12 +18,12 @@ import java.util.UUID;
 public class CategoryController {
     private final CategoryService categoryService;
 
-    @PreAuthorize("hasAnyAuthority('CLIENT', 'ADMIN')")
+    @PreAuthorize("isAnonymous() || hasAnyAuthority('CLIENT', 'ADMIN')")
     @GetMapping
     public ResponseEntity<List<CategoryDto>> getRootCatalogues(){
         return ResponseEntity.ok(categoryService.getRootCatalogues());
     }
-    @PreAuthorize("hasAnyAuthority('CLIENT', 'ADMIN')")
+    @PreAuthorize("isAnonymous() || hasAnyAuthority('CLIENT', 'ADMIN')")
     @GetMapping("/{catalogueId}")
     public ResponseEntity<FullCategoryDto> getCatalogueTree(@PathVariable UUID catalogueId){
         return ResponseEntity.ok(
@@ -31,7 +31,7 @@ public class CategoryController {
         );
     }
 
-    @PreAuthorize("hasAnyAuthority('CLIENT', 'ADMIN')")
+    @PreAuthorize("isAnonymous() || hasAnyAuthority('CLIENT', 'ADMIN')")
     @GetMapping("/{catalogueId}/children")
     public ResponseEntity<List<CategoryDto>> getChildren(@PathVariable UUID catalogueId){
         return ResponseEntity.ok(

@@ -22,7 +22,7 @@ import java.util.UUID;
 public class OrderController {
     private final OrderService orderService;
 
-    @PreAuthorize("hasAnyAuthority('CLEINT', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('CLIENT', 'ADMIN')")
     @PostMapping
     public ResponseEntity<OrderDto> createOrder(
             @RequestBody @Validated List<CartItemDto> items,

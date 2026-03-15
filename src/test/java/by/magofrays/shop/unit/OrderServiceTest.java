@@ -153,7 +153,7 @@ class OrderServiceTest {
 
                     return orderItem;
                 });
-        
+
         when(orderRepository.save(any(Order.class))).thenAnswer(
                 invocation -> {
                     Order order = invocation.getArgument(0);
@@ -168,8 +168,8 @@ class OrderServiceTest {
         when(receiptGenerateService.createReceipt(any(OrderDto.class))).thenReturn(receiptUrl);
         OrderDto result = orderService.createOrder(items, profileId);
 
-        itemDto1.setQuantity(itemDto1.getQuantity()-1);
-        itemDto2.setQuantity(itemDto2.getQuantity()-1);
+        itemDto1.setQuantity(itemDto1.getQuantity() - 1);
+        itemDto2.setQuantity(itemDto2.getQuantity() - 1);
         verify(profileRepository).findById(profileId);
 
         verify(cartItemRepository).findById(cartItemDto1.getId());

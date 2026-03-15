@@ -79,17 +79,6 @@ public class CategoryControllerTest {
 
     @Test
     @SneakyThrows
-    public void getCatalogueTreeWithError() {
-        mockMvc.perform(
-                        get("/api/category/" + lst.rootCategoryDto.getId())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .characterEncoding("UTF-8")
-                                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
-    @SneakyThrows
     public void getRootCataloguesTest() {
         when(categoryRepository.getCategoriesByParentCatalogue(null))
                 .thenReturn(Collections.singletonList(lst.rootCategory));
@@ -106,17 +95,6 @@ public class CategoryControllerTest {
                 CategoryDto[].class
         );
         assertEquals(lst.rootCategoryDto, categoryArray[0]);
-    }
-
-    @Test
-    @SneakyThrows
-    public void getRootCataloguesWithError() {
-        mockMvc.perform(
-                        get("/api/category")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .characterEncoding("UTF-8")
-                                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -148,15 +126,6 @@ public class CategoryControllerTest {
         assertEquals(lst.categoryKid1Dto, categories2[0]);
     }
 
-    @Test
-    @SneakyThrows
-    public void getChildrenWithError() {
-        mockMvc.perform(get("/api/category/" + lst.rootCategoryDto.getId() + "/children")
-                .contentType(MediaType.APPLICATION_JSON)
-                .characterEncoding("UTF-8")
-                .accept(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isForbidden());
-    }
 
     @Test
     @SneakyThrows
@@ -327,6 +296,13 @@ public class CategoryControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .characterEncoding("UTF-8")
         ).andExpect(status().isForbidden());
+        addRemoveItemDto.setItemId(null);
+        mockMvc.perform(put("/api/category/item")
+                .header("Authorization", "Bearer " + tokenGenerator.getAdminToken())
+                .content(objectMapper.writeValueAsString(addRemoveItemDto))
+                .contentType(MediaType.APPLICATION_JSON)
+                .characterEncoding("UTF-8")
+        ).andExpect(status().isBadRequest());
     }
 
     @Test
@@ -361,6 +337,14 @@ public class CategoryControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .characterEncoding("UTF-8")
         ).andExpect(status().isBadRequest());
+        addRemoveItemDto.setItemId(null);
+        mockMvc.perform(delete("/api/category/item")
+                .header("Authorization", "Bearer " + tokenGenerator.getAdminToken())
+                .content(objectMapper.writeValueAsString(addRemoveItemDto))
+                .contentType(MediaType.APPLICATION_JSON)
+                .characterEncoding("UTF-8")
+        ).andExpect(status().isBadRequest());
+        addRemoveItemDto.setItemId(lst.item2.getId());
         mockMvc.perform(delete("/api/category/item")
                 .header("Authorization", "Bearer " + tokenGenerator.getUserToken())
                 .content(objectMapper.writeValueAsString(addRemoveItemDto))

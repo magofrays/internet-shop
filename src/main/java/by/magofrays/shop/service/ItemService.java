@@ -31,8 +31,7 @@ public class ItemService {
             throw new BusinessException(HttpStatus.BAD_REQUEST, "Discount price must be lower than price!");
         }
         Item item = itemMapper.toEntity(itemDto);
-        item.setId(UUID.randomUUID());
-        itemRepository.save(item);
+        item = itemRepository.save(item);
         if(image != null){
             setImageForItem(item, image);
         }
@@ -56,7 +55,7 @@ public class ItemService {
 
     public void deleteItemImage(UUID itemId){
         String url = itemRepository.findById(itemId).orElseThrow(
-                () -> new BusinessException(HttpStatus.NOT_FOUND, "Item not found!")).getImageUrl();
+                () -> new BusinessException(HttpStatus.NOT_FOUND, "Image url not found!")).getImageUrl();
         fileStorageService.deleteFileForEntity(url, itemId);
     }
 

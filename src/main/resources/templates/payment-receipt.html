@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8"/>
     <style>
         body { font-family: Arial, sans-serif; color: #333; line-height: 1.6; margin: 0; padding: 0; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
@@ -16,30 +16,30 @@
         .total { font-size: 18px; font-weight: bold; text-align: right; margin-top: 20px; }
         .total span { color: #3a79c9; }
     </style>
-    <title>ЧЕК ОБ ОПЛАТЕ</title>
+    <title>PAYMENT RECEIPT</title>
 </head>
 <body>
 <div class="container">
-    <div class="header">ЧЕК ОБ ОПЛАТЕ</div>
+    <div class="header">PAYMENT RECEIPT</div>
     <div class="content">
         <div class="info">
-            <p><strong>Заказ №:</strong> <span th:text="${order.id}">—</span></p>
+            <p><strong>Order #:</strong> <span th:text="${order.id}">—</span></p>
             <p th:if="${order.createdBy != null}">
-                <strong>Покупатель:</strong>
-                <span th:text="${order.createdBy.fullName}"></span>
+                <strong>Customer:</strong>
+                <span th:text="${order.createdBy.lastName + ' ' + order.createdBy.firstName}"></span>
                 (<span th:text="${order.createdBy.email}"></span>)
             </p>
-            <p><strong>Дата:</strong> <span th:text="${#temporals.format(now, 'yyyy-MM-dd HH:mm')}"></span></p>
+            <p><strong>Date:</strong> <span th:text="${#temporals.format(now, 'yyyy-MM-dd HH:mm')}"></span></p>
         </div>
 
         <table>
             <thead>
-            <tr><th>№</th><th>Наименование</th><th>Цена</th><th>Скидка</th></tr>
+            <tr><th>#</th><th>Product</th><th>Price</th><th>Discount</th></tr>
             </thead>
             <tbody>
             <tr th:each="item, iter : ${order.itemList}">
                 <td th:text="${iter.index + 1}">1</td>
-                <td th:text="${item.item?.title ?: 'Товар'}">Товар</td>
+                <td th:text="${item.item?.title ?: 'Product'}">Product</td>
                 <td th:text="${#numbers.formatDecimal(item.cost, 1, 2)}">0.00</td>
                 <td>
                     <span th:if="${item.discountCost != null and item.discountCost > 0}"
@@ -48,19 +48,19 @@
                 </td>
             </tr>
             <tr th:if="${#lists.isEmpty(order.itemList)}">
-                <td colspan="4" style="text-align:center;">Нет товаров</td>
+                <td colspan="4" style="text-align:center;">No items</td>
             </tr>
             </tbody>
         </table>
 
         <div class="total">
-            ИТОГО: <span th:text="${#numbers.formatDecimal(order.totalCost, 1, 2)} + ' ' + ${order.currency ?: 'RUB'}"></span>
-            <br th:if="${order.discountCost != null and order.discountCost > 0}">
+            TOTAL: <span th:text="${#numbers.formatDecimal(order.totalCost, 1, 2)} + ' ' + ${order.currency ?: 'RUB'}"></span>
+            <br th:if="${order.discountCost != null and order.discountCost > 0}"/>
             <span th:if="${order.discountCost != null and order.discountCost > 0}"
-                  style="font-size:14px; color:green;">Скидка на заказ: <span th:text="${#numbers.formatDecimal(order.discountCost, 1, 2)}"></span></span>
+                  style="font-size:14px; color:green;">Order discount: <span th:text="${#numbers.formatDecimal(order.discountCost, 1, 2)}"></span></span>
         </div>
     </div>
-    <div class="footer">Спасибо за покупку!</div>
+    <div class="footer">Thank you for your order!</div>
 </div>
 </body>
 </html>
