@@ -31,10 +31,11 @@ public class ItemService {
             throw new BusinessException(HttpStatus.BAD_REQUEST, "Discount price must be lower than price!");
         }
         Item item = itemMapper.toEntity(itemDto);
-        item = itemRepository.save(item);
+        item.setId(UUID.randomUUID());
         if(image != null){
             setImageForItem(item, image);
         }
+        item = itemRepository.save(item);
         log.info("Created item: {}", itemDto.getId());
         itemDto.setId(item.getId());
         return itemDto;

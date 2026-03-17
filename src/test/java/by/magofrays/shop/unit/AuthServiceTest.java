@@ -88,7 +88,7 @@ public class AuthServiceTest {
         Assertions.assertNotEquals(savedProfile.getPassword(), createUpdateProfileDto.getPassword());
         Assertions.assertNotNull(savedProfile.getCart());
         Assertions.assertNotNull(userDetails, "authService.createProfile() returned null");
-        Assertions.assertEquals(createUpdateProfileDto.getEmail(), userDetails.getUsername());
+        Assertions.assertEquals(profile.getId().toString(), userDetails.getUsername());
         Assertions.assertEquals(
                 Collections.singleton(
                         new SimpleGrantedAuthority(Role.CLIENT.name())),
@@ -137,7 +137,7 @@ public class AuthServiceTest {
         Mockito.when(profileRepository.findByEmail(email)).thenReturn(Optional.of(profile));
         UserDetails userDetails = authService.loadUserByUsername(email);
         Assertions.assertNotNull(userDetails, "authService.createProfile() returned null");
-        Assertions.assertEquals(email, userDetails.getUsername());
+        Assertions.assertEquals(profile.getId().toString(), userDetails.getUsername());
         Assertions.assertEquals(
                 Collections.singleton(
                         new SimpleGrantedAuthority(Role.CLIENT.name())),
@@ -172,6 +172,6 @@ public class AuthServiceTest {
         Assertions.assertTrue(claimsOpt.isPresent(), "expiresAt not in future");
         Jws<Claims> claims = claimsOpt.get();
         Assertions.assertEquals(userDetails.getUsername(), claims.getBody().get("id"));
-        Assertions.assertEquals(userDetails.getAuthorities().stream().findFirst().toString(), claims.getBody().get("role"));
+        Assertions.assertEquals(Role.CLIENT.name(), claims.getBody().get("role"));
     }
 }

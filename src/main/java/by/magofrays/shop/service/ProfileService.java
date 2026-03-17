@@ -73,6 +73,7 @@ public class ProfileService {
         Profile profile = profileRepository.findById(profileId)
                 .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Profile not found!"));
         profile.setRole(role);
+        profile.setUpdatedAt(Instant.now());
         profile = profileRepository.save(profile);
         return profileMapper.toDto(profile);
     }

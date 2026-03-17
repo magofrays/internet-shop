@@ -38,7 +38,7 @@ public class CartController {
     ){
         UUID profileId = UUID.fromString(principal.getUsername());
         cartService.removeItemFromCart(cartItemId, profileId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
 

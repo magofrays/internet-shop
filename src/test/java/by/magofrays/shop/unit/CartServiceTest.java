@@ -13,6 +13,7 @@ import by.magofrays.shop.repository.CartItemRepository;
 import by.magofrays.shop.repository.ItemRepository;
 import by.magofrays.shop.repository.ProfileRepository;
 import by.magofrays.shop.service.CartService;
+import by.magofrays.shop.utils.LocalStorageTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,73 +50,31 @@ class CartServiceTest {
     @Autowired
     private CartService cartService;
 
-    private UUID profileId;
-    private UUID itemId;
-    private UUID cartItemId;
-    private Profile profile;
-    private Cart cart;
-    private Item item;
-    private CartItem cartItem;
-    private CartItemDto cartItemDto;
+    private LocalStorageTest lst;
 
     @BeforeEach
     void setUp() {
-        profileId = UUID.randomUUID();
-        itemId = UUID.randomUUID();
-        cartItemId = UUID.randomUUID();
-
-        cart = Cart.builder()
-                .id(UUID.randomUUID())
-                .build();
-
-        profile = Profile.builder()
-                .id(profileId)
-                .cart(cart)
-                .build();
-
-        item = Item.builder()
-                .id(itemId)
-                .title("Test Item")
-                .price(BigDecimal.TEN)
-                .build();
-
-        cartItem = CartItem.builder()
-                .id(cartItemId)
-                .cart(cart)
-                .item(item)
-                .build();
-
-        ItemDto itemDto = ItemDto.builder()
-                .id(itemId)
-                .title(item.getTitle())
-                .price(item.getPrice())
-                .build();
-
-        cartItemDto = CartItemDto.builder()
-                .id(cartItemId)
-                .item(itemDto)
-                .build();
+        lst = new LocalStorageTest();
     }
 
     @Test
     void getItemsInCart_ShouldReturnListOfDtos_WhenProfileExists() {
-        cart.setItemList(Collections.singletonList(cartItem));
-        when(profileRepository.findById(profileId)).thenReturn(Optional.of(profile));
+        when(profileRepository.findById(lst.profileId)).thenReturn(Optional.of(lst.profile));
 
-        List<CartItemDto> result = cartService.getItemsInCart(profileId);
+        List<CartItemDto> result = cartService.getItemsInCart(lst.profileId);
 
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(cartItemDto, result.get(0));
-        verify(profileRepository, times(1)).findById(profileId);
+        assertEquals(2, result.size());
+        assertEquals(lst.cartItemDto1, result.get(0));
+        verify(profileRepository, times(1)).findById(lst.profileId);
     }
 
     @Test
     void getItemsInCart_ShouldReturnEmptyList_WhenCartHasNoItems() {
-        cart.setItemList(new ArrayList<>());
-        when(profileRepository.findById(profileId)).thenReturn(Optional.of(profile));
+        lst.cart.setItemList(new ArrayList<>());
+        when(profileRepository.findById(lst.profileId)).thenReturn(Optional.of(lst.profile));
 
-        List<CartItemDto> result = cartService.getItemsInCart(profileId);
+        List<CartItemDto> result = cartService.getItemsInCart(lst.profileId);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -123,81 +82,81 @@ class CartServiceTest {
 
     @Test
     void getItemsInCart_WhenProfileNotFound_ShouldThrowBusinessException() {
-        when(profileRepository.findById(profileId)).thenReturn(Optional.empty());
+        when(profileRepository.findById(lst.profileId)).thenReturn(Optional.empty());
 
-        BusinessException ex = assertThrows(BusinessException.class,
-                () -> cartService.getItemsInCart(profileId));
-        verify(profileRepository, times(1)).findById(profileId);
+        assertThrows(BusinessException.class,
+                () -> cartService.getItemsInCart(lst.profileId));
+        verify(profileRepository, times(1)).findById(lst.profileId);
     }
 
 
     @Test
     void addItemIntoCart_ShouldCreateCartItemAndReturnDto() {
-        when(profileRepository.findById(profileId)).thenReturn(Optional.of(profile));
-        when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
-        when(cartItemRepository.save(any(CartItem.class))).thenReturn(cartItem);
+        when(profileRepository.findById(lst.profileId)).thenReturn(Optional.of(lst.profile));
+        when(itemRepository.findById(lst.item1.getId())).thenReturn(Optional.of(lst.item1));
+        when(cartItemRepository.save(any(CartItem.class))).thenReturn(lst.cartItem1);
 
-        CartItemDto result = cartService.addItemIntoCart(itemId, profileId);
+        CartItemDto result = cartService.addItemIntoCart(lst.item1.getId(), lst.profileId);
 
         assertNotNull(result);
-        assertEquals(cartItemDto, result);
-        verify(profileRepository, times(1)).findById(profileId);
-        verify(itemRepository, times(1)).findById(itemId);
+        assertEquals(lst.cartItemDto1, result);
+        verify(profileRepository, times(1)).findById(lst.profileId);
+        verify(itemRepository, times(1)).findById(lst.item1.getId());
         verify(cartItemRepository, times(1)).save(argThat(savedCartItem ->
-                savedCartItem.getCart().equals(cart) && savedCartItem.getItem().equals(item)
+                savedCartItem.getCart().equals(lst.cart) && savedCartItem.getItem().equals(lst.item1)
         ));
     }
 
     @Test
     void addItemIntoCart_WhenProfileNotFound_ShouldThrowBusinessException() {
-        when(profileRepository.findById(profileId)).thenReturn(Optional.empty());
+        when(profileRepository.findById(lst.profileId)).thenReturn(Optional.empty());
 
-        BusinessException ex = assertThrows(BusinessException.class,
-                () -> cartService.addItemIntoCart(itemId, profileId));
-        verify(profileRepository, times(1)).findById(profileId);
+        assertThrows(BusinessException.class,
+                () -> cartService.addItemIntoCart(lst.item1.getId(), lst.profileId));
+        verify(profileRepository, times(1)).findById(lst.profileId);
     }
 
     @Test
     void addItemIntoCart_WhenItemNotFound_ShouldThrowBusinessException() {
-        when(profileRepository.findById(profileId)).thenReturn(Optional.of(profile));
-        when(itemRepository.findById(itemId)).thenReturn(Optional.empty());
+        when(profileRepository.findById(lst.profileId)).thenReturn(Optional.of(lst.profile));
+        when(itemRepository.findById(lst.item1.getId())).thenReturn(Optional.empty());
 
-        BusinessException ex = assertThrows(BusinessException.class,
-                () -> cartService.addItemIntoCart(itemId, profileId));
-        verify(profileRepository, times(1)).findById(profileId);
-        verify(itemRepository, times(1)).findById(itemId);
+        assertThrows(BusinessException.class,
+                () -> cartService.addItemIntoCart(lst.item1.getId(), lst.profileId));
+        verify(profileRepository, times(1)).findById(lst.profileId);
+        verify(itemRepository, times(1)).findById(lst.item1.getId());
     }
 
     @Test
     void removeItemFromCart_ShouldDeleteCartItemAndReturnDto() {
+        when(profileRepository.findById(lst.profileId)).thenReturn(Optional.of(lst.profile));
+        when(cartItemRepository.findById(lst.cartItem1.getId())).thenReturn(Optional.of(lst.cartItem1));
+        cartService.removeItemFromCart(lst.cartItem1.getId(), lst.profileId);
 
-        when(cartItemRepository.findById(cartItemId)).thenReturn(Optional.of(cartItem));
-        cartService.removeItemFromCart(cartItemId, profileId);
-
-        verify(cartItemRepository, times(1)).findById(cartItemId);
-        verify(cartItemRepository, times(1)).delete(cartItem);
+        verify(cartItemRepository, times(1)).findById(lst.cartItem1.getId());
+        verify(cartItemRepository, times(1)).delete(lst.cartItem1);
     }
 
     @Test
     void removeItemFromCart_WhenCartItemNotFound_ShouldThrowBusinessException() {
-        when(cartItemRepository.findById(cartItemId)).thenReturn(Optional.empty());
-
-        BusinessException ex = assertThrows(BusinessException.class,
-                () -> cartService.removeItemFromCart(cartItemId, profileId));
-        verify(cartItemRepository, times(1)).findById(cartItemId);
+        when(cartItemRepository.findById(lst.cartItem1.getId())).thenReturn(Optional.empty());
+        when(profileRepository.findById(lst.profileId)).thenReturn(Optional.of(lst.profile));
+        assertThrows(BusinessException.class,
+                () -> cartService.removeItemFromCart(lst.cartItem1.getId(), lst.profileId));
+        verify(cartItemRepository, times(1)).findById(lst.cartItem1.getId());
         verify(cartItemRepository, never()).delete(any());
     }
 
     @Test
     void createCartItem_ShouldSaveAndReturnCartItem() {
-        when(cartItemRepository.save(any(CartItem.class))).thenReturn(cartItem);
+        when(cartItemRepository.save(any(CartItem.class))).thenReturn(lst.cartItem1);
 
-        CartItem result = cartService.createCartItem(cart, item);
+        CartItem result = cartService.createCartItem(lst.cart, lst.item1);
 
         assertNotNull(result);
-        assertEquals(cartItem, result);
+        assertEquals(lst.cartItem1, result);
         verify(cartItemRepository, times(1)).save(argThat(savedCartItem ->
-                savedCartItem.getCart().equals(cart) && savedCartItem.getItem().equals(item)
+                savedCartItem.getCart().equals(lst.cart) && savedCartItem.getItem().equals(lst.item1)
         ));
     }
 }

@@ -232,7 +232,7 @@ public class CategoryControllerTest {
                 .header("Authorization", "Bearer " + tokenGenerator.getAdminToken())
                 .contentType(MediaType.APPLICATION_JSON)
                 .characterEncoding("UTF-8")
-        ).andExpect(status().isOk());
+        ).andExpect(status().isNoContent());
     }
 
     @Test

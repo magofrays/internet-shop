@@ -43,14 +43,14 @@ public class ItemController {
     @DeleteMapping("/image")
     public ResponseEntity<?> deleteItemImage(@RequestBody UUID itemId){
         itemService.deleteItemImage(itemId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping
     public ResponseEntity<?> deleteItem(@RequestBody UUID itemId){
         itemService.deleteItem(itemId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -63,14 +63,12 @@ public class ItemController {
         return ResponseEntity.ok(result);
     }
 
-    @PreAuthorize("isAnonymous() || hasAnyAuthority('CLIENT', 'ADMIN')")
     @GetMapping("/{itemId}")
     public ResponseEntity<ItemDto> getItemById(@PathVariable UUID itemId){
         ItemDto result = itemService.findById(itemId);
         return ResponseEntity.ok(result);
     }
 
-    @PreAuthorize("isAnonymous() || hasAnyAuthority('CLIENT', 'ADMIN')")
     @GetMapping
     public ResponseEntity<List<ItemDto>> getItems(){
         return ResponseEntity.ok(
@@ -78,7 +76,6 @@ public class ItemController {
         );
     }
 
-    @PreAuthorize("isAnonymous() || hasAnyAuthority('CLIENT', 'ADMIN')")
     @GetMapping("/image/{itemId}")
     public ResponseEntity<Resource> getItemImage(@PathVariable UUID itemId){
         return ResponseEntity.ok(

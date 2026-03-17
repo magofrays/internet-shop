@@ -26,6 +26,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -98,17 +99,26 @@ public class ItemServiceTest {
                 .description("Чехол для Apple")
                 .price(new BigDecimal("100.50"))
                 .discountPrice(new BigDecimal("75.50"))
-                .imageUrl(imageUrl)
                 .quantity(10L)
                 .createdAt(Instant.now())
                 .updatedAt(Instant.now())
                 .build();
+        MultipartFile file = new MockMultipartFile("www.jpg", (byte[]) null);
         ArgumentCaptor<Item> itemCaptor = ArgumentCaptor.forClass(Item.class);
-        when(itemRepository.save(any(Item.class))).thenReturn(item);
-        ItemDto itemDto = itemService.createItem(createItem, new MockMultipartFile("www.jpg", (byte[]) null));
+        when(fileStorageService.uploadFile(eq(file), eq("images/item"), any(UUID.class), eq(null))).thenReturn(imageUrl);
+        when(itemRepository.save(any(Item.class))).thenAnswer(req -> {
+            Item saveItem = req.getArgument(0);
+            saveItem.setId(item.getId());
+            saveItem.setCreatedAt(item.getCreatedAt());
+            saveItem.setUpdatedAt(item.getUpdatedAt());
+            item.setImageUrl(saveItem.getImageUrl());
+            return saveItem;
+        });
+        ItemDto itemDto = itemService.createItem(createItem, file);
         verify(itemRepository).save(itemCaptor.capture());
         Item savedItem = itemCaptor.getValue();
         Assertions.assertNotNull(savedItem);
+        assertEquals(item, savedItem);
         Assertions.assertNotNull(savedItem.getImageUrl(), "Image is not set");
         Assertions.assertNotNull(itemDto, "itemService.createItem() returned null");
         assertDtoAndEntity(savedItem, createItem);
@@ -129,11 +139,11 @@ public class ItemServiceTest {
     }
 
     private void assertDtoAndEntity(Item item, ItemDto itemDto){
-        Assertions.assertEquals(itemDto.getTitle(), item.getTitle());
-        Assertions.assertEquals(itemDto.getQuantity(), item.getQuantity());
-        Assertions.assertEquals(itemDto.getDescription(), item.getDescription());
-        Assertions.assertEquals(itemDto.getPrice(), item.getPrice());
-        Assertions.assertEquals(itemDto.getDiscountPrice(), item.getDiscountPrice());
+        assertEquals(itemDto.getTitle(), item.getTitle());
+        assertEquals(itemDto.getQuantity(), item.getQuantity());
+        assertEquals(itemDto.getDescription(), item.getDescription());
+        assertEquals(itemDto.getPrice(), item.getPrice());
+        assertEquals(itemDto.getDiscountPrice(), item.getDiscountPrice());
     }
 
     @Test
@@ -144,11 +154,11 @@ public class ItemServiceTest {
         ItemDto result = itemService.updateItem(updateItemDto, null);
 
         Assertions.assertNotNull(result);
-        Assertions.assertEquals(updateItemDto.getTitle(), result.getTitle());
-        Assertions.assertEquals(updateItemDto.getDescription(), result.getDescription());
-        Assertions.assertEquals(updateItemDto.getPrice(), result.getPrice());
-        Assertions.assertEquals(updateItemDto.getDiscountPrice(), result.getDiscountPrice());
-        Assertions.assertEquals(updateItemDto.getQuantity(), result.getQuantity());
+        assertEquals(updateItemDto.getTitle(), result.getTitle());
+        assertEquals(updateItemDto.getDescription(), result.getDescription());
+        assertEquals(updateItemDto.getPrice(), result.getPrice());
+        assertEquals(updateItemDto.getDiscountPrice(), result.getDiscountPrice());
+        assertEquals(updateItemDto.getQuantity(), result.getQuantity());
 
         verify(itemRepository, times(1)).findById(existingItemId);
         verify(itemRepository, times(1)).save(any(Item.class));
@@ -170,7 +180,7 @@ public class ItemServiceTest {
         ItemDto result = itemService.updateItem(updateItemDto, newImage);
 
         Assertions.assertNotNull(result);
-        Assertions.assertEquals(updateItemDto.getTitle(), result.getTitle());
+        assertEquals(updateItemDto.getTitle(), result.getTitle());
 
         verify(itemRepository, times(1)).findById(existingItemId);
         verify(itemRepository, times(1)).save(any(Item.class));
@@ -189,7 +199,7 @@ public class ItemServiceTest {
                 BusinessException.class,
                 () -> itemService.updateItem(dtoWithNullId, null)
         );
-        Assertions.assertEquals(HttpStatus.BAD_REQUEST, exception.getHttpStatus());
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getHttpStatus());
 
         verify(itemRepository, never()).findById(any());
         verify(itemRepository, never()).save(any());
@@ -208,7 +218,7 @@ public class ItemServiceTest {
                 BusinessException.class,
                 () -> itemService.updateItem(invalidDto, null)
         );
-        Assertions.assertEquals(HttpStatus.BAD_REQUEST, exception.getHttpStatus());
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getHttpStatus());
 
         verify(itemRepository, never()).findById(any());
         verify(itemRepository, never()).save(any());
@@ -229,7 +239,7 @@ public class ItemServiceTest {
                 BusinessException.class,
                 () -> itemService.updateItem(dto, null)
         );
-        Assertions.assertEquals(HttpStatus.NOT_FOUND, exception.getHttpStatus());
+        assertEquals(HttpStatus.NOT_FOUND, exception.getHttpStatus());
 
         verify(itemRepository, times(1)).findById(nonExistentId);
         verify(itemRepository, never()).save(any());
@@ -248,10 +258,10 @@ public class ItemServiceTest {
 
         ItemDto result = itemService.updateItem(partialUpdateDto, null);
 
-        Assertions.assertEquals("Только название изменено", result.getTitle());
-        Assertions.assertEquals(existingItem.getDescription(), result.getDescription());
-        Assertions.assertEquals(new BigDecimal("100.00"), result.getPrice());
-        Assertions.assertEquals(existingItem.getQuantity(), result.getQuantity());
+        assertEquals("Только название изменено", result.getTitle());
+        assertEquals(existingItem.getDescription(), result.getDescription());
+        assertEquals(new BigDecimal("100.00"), result.getPrice());
+        assertEquals(existingItem.getQuantity(), result.getQuantity());
     }
 
 
@@ -262,12 +272,12 @@ public class ItemServiceTest {
         ItemDto result = itemService.findById(existingItemId);
 
         Assertions.assertNotNull(result);
-        Assertions.assertEquals(existingItem.getId(), result.getId());
-        Assertions.assertEquals(existingItem.getTitle(), result.getTitle());
-        Assertions.assertEquals(existingItem.getDescription(), result.getDescription());
-        Assertions.assertEquals(existingItem.getPrice(), result.getPrice());
-        Assertions.assertEquals(existingItem.getDiscountPrice(), result.getDiscountPrice());
-        Assertions.assertEquals(existingItem.getQuantity(), result.getQuantity());
+        assertEquals(existingItem.getId(), result.getId());
+        assertEquals(existingItem.getTitle(), result.getTitle());
+        assertEquals(existingItem.getDescription(), result.getDescription());
+        assertEquals(existingItem.getPrice(), result.getPrice());
+        assertEquals(existingItem.getDiscountPrice(), result.getDiscountPrice());
+        assertEquals(existingItem.getQuantity(), result.getQuantity());
 
         verify(itemRepository, times(1)).findById(existingItemId);
     }
@@ -281,7 +291,7 @@ public class ItemServiceTest {
                 BusinessException.class,
                 () -> itemService.findById(nonExistentId)
         );
-        Assertions.assertEquals(HttpStatus.NOT_FOUND, exception.getHttpStatus());
+        assertEquals(HttpStatus.NOT_FOUND, exception.getHttpStatus());
 
         verify(itemRepository, times(1)).findById(nonExistentId);
     }
@@ -303,13 +313,13 @@ public class ItemServiceTest {
         List<ItemDto> result = itemService.getAllItems();
 
         Assertions.assertNotNull(result);
-        Assertions.assertEquals(2, result.size());
+        assertEquals(2, result.size());
 
-        Assertions.assertEquals(existingItem.getId(), result.get(0).getId());
-        Assertions.assertEquals(existingItem.getTitle(), result.get(0).getTitle());
+        assertEquals(existingItem.getId(), result.get(0).getId());
+        assertEquals(existingItem.getTitle(), result.get(0).getTitle());
 
-        Assertions.assertEquals(item2.getId(), result.get(1).getId());
-        Assertions.assertEquals(item2.getTitle(), result.get(1).getTitle());
+        assertEquals(item2.getId(), result.get(1).getId());
+        assertEquals(item2.getTitle(), result.get(1).getTitle());
 
         verify(itemRepository, times(1)).findAll();
     }
@@ -332,14 +342,14 @@ public class ItemServiceTest {
 
         List<ItemDto> result = itemService.getAllItems();
 
-        Assertions.assertEquals(1, result.size());
+        assertEquals(1, result.size());
         ItemDto dto = result.get(0);
 
-        Assertions.assertEquals(existingItem.getId(), dto.getId());
-        Assertions.assertEquals(existingItem.getTitle(), dto.getTitle());
-        Assertions.assertEquals(existingItem.getDescription(), dto.getDescription());
-        Assertions.assertEquals(existingItem.getPrice(), dto.getPrice());
-        Assertions.assertEquals(existingItem.getDiscountPrice(), dto.getDiscountPrice());
-        Assertions.assertEquals(existingItem.getQuantity(), dto.getQuantity());
+        assertEquals(existingItem.getId(), dto.getId());
+        assertEquals(existingItem.getTitle(), dto.getTitle());
+        assertEquals(existingItem.getDescription(), dto.getDescription());
+        assertEquals(existingItem.getPrice(), dto.getPrice());
+        assertEquals(existingItem.getDiscountPrice(), dto.getDiscountPrice());
+        assertEquals(existingItem.getQuantity(), dto.getQuantity());
     }
 }

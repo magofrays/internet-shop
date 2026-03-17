@@ -260,7 +260,7 @@ public class ItemControllerTest {
 
     @Test
     @SneakyThrows
-    public void deleteItemImage() {
+    public void deleteItemImageWithNoFound() {
         UUID itemId = UUID.randomUUID();
 
         mockMvc.perform(delete("/api/item/image").header("Authorization", "Bearer " + tokenGenerator.getAdminToken()).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(itemId))).andExpect(status().isNotFound());

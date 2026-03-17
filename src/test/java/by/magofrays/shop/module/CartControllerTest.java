@@ -94,7 +94,7 @@ public class CartControllerTest  {
                 .contentType(MediaType.APPLICATION_JSON)
                 .characterEncoding("UTF-8")
                 .content(String.format("\"%s\"",lst.cartItem1.getId().toString()))
-        ).andExpect(status().isOk());
+        ).andExpect(status().isNoContent());
     }
 
     @Test

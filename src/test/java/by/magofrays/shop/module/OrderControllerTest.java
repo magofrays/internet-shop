@@ -1,7 +1,13 @@
 package by.magofrays.shop.module;
 
-import by.magofrays.shop.dto.*;
-import by.magofrays.shop.entity.*;
+import by.magofrays.shop.dto.CartItemDto;
+import by.magofrays.shop.dto.OrderDto;
+import by.magofrays.shop.dto.UpdateOrderDto;
+import by.magofrays.shop.dto.UpdateOrderStatus;
+import by.magofrays.shop.entity.Item;
+import by.magofrays.shop.entity.Order;
+import by.magofrays.shop.entity.OrderItem;
+import by.magofrays.shop.entity.OrderStatus;
 import by.magofrays.shop.repository.*;
 import by.magofrays.shop.utils.LocalStorageTest;
 import by.magofrays.shop.utils.TokenGenerator;
@@ -20,7 +26,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import javax.mail.internet.MimeMessage;
-import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -353,7 +358,7 @@ public class OrderControllerTest {
 
         mockMvc.perform(delete("/api/order/{orderId}", localStorage.orderId)
                         .header("Authorization", "Bearer " + tokenGenerator.getAdminToken()))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     @Test
