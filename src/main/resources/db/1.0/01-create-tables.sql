@@ -8,7 +8,7 @@ create table profile
     first_name varchar(128) not null,
     last_name varchar(128) not null,
     email varchar(128) not null unique,
-    password varchar(128) not null,
+    password varchar(255) not null,
     role_id int not null,
     created_at timestamptz not null default current_timestamp,
     updated_at timestamptz not null default current_timestamp

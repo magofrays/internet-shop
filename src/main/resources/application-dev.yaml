@@ -50,6 +50,7 @@ receipt:
 
 logging:
   level:
+    root: INFO
     org.springframework.security: DEBUG
     by.magofrays: DEBUG
 

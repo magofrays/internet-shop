@@ -46,8 +46,12 @@ spring:
     from-address: noreply@shop.ru
 logging:
   level:
-    org.springframework.security: DEBUG
-    by.magofrays: DEBUG
+    root: INFO
+    org.springframework.security: INFO
+    by.magofrays: INFO
+
+receipt:
+  template: payment-receipt
 
 file:
   upload:
