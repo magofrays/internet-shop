@@ -26,14 +26,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import javax.mail.internet.MimeMessage;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -82,7 +78,7 @@ public class OrderControllerTest {
     @SneakyThrows
     public void createOrder_AsClient_Success() {
         CartItemDto cartItemDto = localStorage.cartItemDto1;
-        List<CartItemDto> items = Arrays.asList(cartItemDto);
+        List<CartItemDto> items = Collections.singletonList(cartItemDto);
 
         when(profileRepository.findById(any(UUID.class))).thenReturn(java.util.Optional.of(localStorage.profile));
         when(cartItemRepository.findById(localStorage.cartItem1.getId())).thenReturn(java.util.Optional.of(localStorage.cartItem1));
@@ -110,7 +106,7 @@ public class OrderControllerTest {
     @SneakyThrows
     public void createOrder_AsAdmin_Success() {
         CartItemDto cartItemDto = localStorage.cartItemDto1;
-        List<CartItemDto> items = Arrays.asList(cartItemDto);
+        List<CartItemDto> items = Collections.singletonList(cartItemDto);
 
         when(profileRepository.findById(any(UUID.class))).thenReturn(Optional.of(localStorage.profile));
         when(cartItemRepository.findById(localStorage.cartItem1.getId())).thenReturn(Optional.of(localStorage.cartItem1));
@@ -136,7 +132,7 @@ public class OrderControllerTest {
     @Test
     @SneakyThrows
     public void createOrder_EmptyItems_ShouldReturnBadRequest() {
-        List<CartItemDto> items = Arrays.asList();
+        List<CartItemDto> items = Collections.emptyList();
 
         mockMvc.perform(post("/api/order")
                         .header("Authorization", "Bearer " + tokenGenerator.getUserToken())
@@ -149,7 +145,7 @@ public class OrderControllerTest {
     @SneakyThrows
     public void createOrder_Forbidden() {
         CartItemDto cartItemDto = localStorage.cartItemDto1;
-        List<CartItemDto> items = Arrays.asList(cartItemDto);
+        List<CartItemDto> items = Collections.singletonList(cartItemDto);
 
         mockMvc.perform(post("/api/order")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -209,7 +205,7 @@ public class OrderControllerTest {
 
         UpdateOrderDto updateOrderDto = UpdateOrderDto.builder()
                 .orderId(localStorage.orderId)
-                .items(Arrays.asList(cartItemDto))
+                .items(Collections.singletonList(cartItemDto))
                 .build();
 
         when(orderRepository.findById(localStorage.orderId)).thenReturn(java.util.Optional.of(localStorage.order));
@@ -239,7 +235,7 @@ public class OrderControllerTest {
 
         UpdateOrderDto updateOrderDto = UpdateOrderDto.builder()
                 .orderId(localStorage.orderId)
-                .items(Arrays.asList(cartItemDto))
+                .items(Collections.singletonList(cartItemDto))
                 .build();
 
         when(orderRepository.findById(localStorage.orderId)).thenReturn(java.util.Optional.of(localStorage.order));
@@ -267,7 +263,7 @@ public class OrderControllerTest {
     public void updateOrder_EmptyItems_ShouldReturnBadRequest() {
         UpdateOrderDto updateOrderDto = UpdateOrderDto.builder()
                 .orderId(localStorage.orderId)
-                .items(Arrays.asList())
+                .items(Collections.emptyList())
                 .build();
 
         mockMvc.perform(put("/api/order")
@@ -284,7 +280,7 @@ public class OrderControllerTest {
 
         UpdateOrderDto updateOrderDto = UpdateOrderDto.builder()
                 .orderId(UUID.randomUUID())
-                .items(Arrays.asList(cartItemDto))
+                .items(Collections.singletonList(cartItemDto))
                 .build();
 
         when(orderRepository.findById(any(UUID.class))).thenReturn(java.util.Optional.empty());

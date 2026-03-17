@@ -28,8 +28,6 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
@@ -80,13 +78,10 @@ class OrderServiceTest {
 
     private UUID profileId;
     private Profile profile;
-    private ReadProfileDto profileDto;
     private CartItem cartItem1, cartItem2;
     private CartItemDto cartItemDto1, cartItemDto2;
     private Item item1, item2;
-    private OrderItemDto orderItemDto1;
     private OrderItem orderItem2;
-    private OrderItemDto orderItemDto2;
     private OrderItem orderItem1;
     private UUID orderId;
     private OrderDto orderDto;
@@ -109,15 +104,15 @@ class OrderServiceTest {
         LocalStorageTest lst = new LocalStorageTest();
         profileId = lst.profileId;
         profile = lst.profile;
-        profileDto = lst.profileDto;
+        ReadProfileDto profileDto = lst.profileDto;
         item1 = lst.item1;
         item2 = lst.item2;
         cartItem1 = lst.cartItem1;
         cartItem2 = lst.cartItem2;
         cartItemDto1 = lst.cartItemDto1;
         cartItemDto2 = lst.cartItemDto2;
-        orderItemDto1 = lst.orderItemDto1;
-        orderItemDto2 = lst.orderItemDto2;
+        OrderItemDto orderItemDto1 = lst.orderItemDto1;
+        OrderItemDto orderItemDto2 = lst.orderItemDto2;
         itemDto1 = lst.itemDto1;
         itemDto2 = lst.itemDto2;
         orderItem1 = lst.orderItem1;
@@ -407,7 +402,7 @@ class OrderServiceTest {
     void updateOrder_orderNotFound_throwsException() {
         UpdateOrderDto updateOrderDto = UpdateOrderDto.builder()
                 .orderId(orderId)
-                .items(Arrays.asList(
+                .items(Collections.singletonList(
                         CartItemDto.builder().item(itemDto1).build()
                 ))
                 .build();

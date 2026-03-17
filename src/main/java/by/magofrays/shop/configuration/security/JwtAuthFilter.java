@@ -35,7 +35,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         log.debug("Inside JWT filter");
 
-        try{
+        try {
             String tokenHeader = request.getHeader(AUTHORIZATION);
             if (tokenHeader == null || !tokenHeader.startsWith("Bearer ")) {
                 filterChain.doFilter(request, response);
@@ -44,8 +44,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             String jwtToken = tokenHeader.substring(7);
             Jws<Claims> claims = jwtUtils.parseToken(jwtToken).orElseThrow(() -> new BusinessException(HttpStatus.UNAUTHORIZED, "Invalid token!"));
 
-            String username = (String)claims.getBody().get("id");
-            String role = (String)claims.getBody().get("role");
+            String username = (String) claims.getBody().get("id");
+            String role = (String) claims.getBody().get("role");
             UserDetails userDetails = new User(username, "", Collections.singletonList(new SimpleGrantedAuthority(role)));
             UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
                     userDetails, null, userDetails.getAuthorities()

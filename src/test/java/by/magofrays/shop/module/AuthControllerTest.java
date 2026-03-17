@@ -1,7 +1,6 @@
 package by.magofrays.shop.module;
 
 import by.magofrays.shop.configuration.security.JwtUtils;
-import by.magofrays.shop.controller.AuthController;
 import by.magofrays.shop.dto.CreateProfileDto;
 import by.magofrays.shop.dto.LoginDto;
 import by.magofrays.shop.dto.LoginResponse;

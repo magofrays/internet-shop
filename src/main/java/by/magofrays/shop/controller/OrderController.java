@@ -26,7 +26,7 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<OrderDto> createOrder(
             @RequestBody @Validated List<CartItemDto> items,
-            @AuthenticationPrincipal UserDetails principal){
+            @AuthenticationPrincipal UserDetails principal) {
         UUID profileId = UUID.fromString(principal.getUsername());
         return ResponseEntity.ok(
                 orderService.createOrder(items, profileId)
@@ -35,7 +35,7 @@ public class OrderController {
 
     @PreAuthorize("hasAnyAuthority('CLIENT', 'ADMIN')")
     @GetMapping("/{orderId}")
-    public ResponseEntity<OrderDto> getOrderById(@PathVariable UUID orderId){
+    public ResponseEntity<OrderDto> getOrderById(@PathVariable UUID orderId) {
         return ResponseEntity.ok(
                 orderService.getOrderById(orderId)
         );
@@ -43,7 +43,7 @@ public class OrderController {
 
     @PreAuthorize("hasAnyAuthority('CLIENT', 'ADMIN')")
     @PutMapping
-    public ResponseEntity<OrderDto> updateOrder(@RequestBody @Validated UpdateOrderDto orderDto){
+    public ResponseEntity<OrderDto> updateOrder(@RequestBody @Validated UpdateOrderDto orderDto) {
         return ResponseEntity.ok(
                 orderService.updateOrder(orderDto)
         );
@@ -51,7 +51,7 @@ public class OrderController {
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/status")
-    public ResponseEntity<OrderDto> updateOrderStatus(@RequestBody @Validated UpdateOrderStatus orderStatus){
+    public ResponseEntity<OrderDto> updateOrderStatus(@RequestBody @Validated UpdateOrderStatus orderStatus) {
         return ResponseEntity.ok(
                 orderService.updateOrderStatus(orderStatus)
         );
@@ -59,7 +59,7 @@ public class OrderController {
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/{orderId}")
-    public ResponseEntity<?> deleteOrder(@PathVariable UUID orderId){
+    public ResponseEntity<?> deleteOrder(@PathVariable UUID orderId) {
         orderService.deleteOrder(orderId);
         return ResponseEntity.noContent().build();
     }

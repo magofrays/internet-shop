@@ -19,19 +19,19 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @GetMapping
-    public ResponseEntity<List<CategoryDto>> getRootCatalogues(){
+    public ResponseEntity<List<CategoryDto>> getRootCatalogues() {
         return ResponseEntity.ok(categoryService.getRootCatalogues());
     }
 
     @GetMapping("/{catalogueId}")
-    public ResponseEntity<FullCategoryDto> getCatalogueTree(@PathVariable UUID catalogueId){
+    public ResponseEntity<FullCategoryDto> getCatalogueTree(@PathVariable UUID catalogueId) {
         return ResponseEntity.ok(
                 categoryService.getCatalogueTree(catalogueId)
         );
     }
 
     @GetMapping("/{catalogueId}/children")
-    public ResponseEntity<List<CategoryDto>> getChildren(@PathVariable UUID catalogueId){
+    public ResponseEntity<List<CategoryDto>> getChildren(@PathVariable UUID catalogueId) {
         return ResponseEntity.ok(
                 categoryService.getCategoriesByParentCategory(catalogueId)
         );
@@ -39,13 +39,13 @@ public class CategoryController {
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
-    public ResponseEntity<CategoryDto> createCatalogue(@RequestBody @Validated CreateUpdateCategoryDto createCategoryDto){
+    public ResponseEntity<CategoryDto> createCatalogue(@RequestBody @Validated CreateUpdateCategoryDto createCategoryDto) {
         return ResponseEntity.ok(categoryService.createCatalogue(createCategoryDto));
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping
-    public ResponseEntity<CategoryDto> updateCatalogue(@RequestBody @Validated(UpdateGroup.class) CreateUpdateCategoryDto updateCategoryDto){
+    public ResponseEntity<CategoryDto> updateCatalogue(@RequestBody @Validated(UpdateGroup.class) CreateUpdateCategoryDto updateCategoryDto) {
         return ResponseEntity.ok(
                 categoryService.updateCatalogue(updateCategoryDto)
         );
@@ -53,7 +53,7 @@ public class CategoryController {
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/item")
-    public ResponseEntity<ItemDto> addItemIntoCatalogue(@RequestBody @Validated AddRemoveItemDto addItemDto){
+    public ResponseEntity<ItemDto> addItemIntoCatalogue(@RequestBody @Validated AddRemoveItemDto addItemDto) {
         return ResponseEntity.ok(
                 categoryService.addItemIntoCatalogue(addItemDto)
         );
@@ -61,7 +61,7 @@ public class CategoryController {
 
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     @DeleteMapping("/item")
-    public ResponseEntity<ItemDto> removeItemFromCatalogue(@RequestBody @Validated AddRemoveItemDto removeItemDto){
+    public ResponseEntity<ItemDto> removeItemFromCatalogue(@RequestBody @Validated AddRemoveItemDto removeItemDto) {
         return ResponseEntity.ok(
                 categoryService.removeItemFromCatalogue(removeItemDto)
         );
@@ -69,7 +69,7 @@ public class CategoryController {
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/{catalogueId}")
-    public ResponseEntity<?> deleteCatalogue(@PathVariable UUID catalogueId){
+    public ResponseEntity<?> deleteCatalogue(@PathVariable UUID catalogueId) {
         categoryService.deleteCatalogueById(catalogueId);
         return ResponseEntity.noContent().build();
     }

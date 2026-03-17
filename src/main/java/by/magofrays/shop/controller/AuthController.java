@@ -27,7 +27,7 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
 
     @PostMapping("/sign-in")
-    public ResponseEntity<LoginResponse> signIn(@RequestBody @Validated LoginDto loginDto){
+    public ResponseEntity<LoginResponse> signIn(@RequestBody @Validated LoginDto loginDto) {
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword())
         );
@@ -37,15 +37,13 @@ public class AuthController {
     }
 
     @PostMapping("/sign-up")
-    public ResponseEntity<LoginResponse> signUp(@RequestBody @Validated CreateProfileDto createProfileDto){
+    public ResponseEntity<LoginResponse> signUp(@RequestBody @Validated CreateProfileDto createProfileDto) {
         return
                 ResponseEntity.ok(authService.createLoginResponse(
-                authService
-                        .createProfile(createProfileDto))
-        );
+                        authService
+                                .createProfile(createProfileDto))
+                );
     }
-
-
 
 
 }

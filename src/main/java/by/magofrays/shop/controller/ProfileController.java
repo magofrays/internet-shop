@@ -25,21 +25,21 @@ public class ProfileController {
 
     @PreAuthorize("hasAnyAuthority('CLIENT', 'ADMIN')")
     @GetMapping
-    public ResponseEntity<ReadProfileDto> getProfileInfo(@AuthenticationPrincipal UserDetails principal){
+    public ResponseEntity<ReadProfileDto> getProfileInfo(@AuthenticationPrincipal UserDetails principal) {
         UUID profileId = UUID.fromString(principal.getUsername());
         return ResponseEntity.ok(profileService.getProfileInfo(profileId));
     }
 
     @PreAuthorize("hasAnyAuthority('CLIENT', 'ADMIN')")
     @GetMapping("cart")
-    public ResponseEntity<CartDto> getCart(@AuthenticationPrincipal UserDetails principal){
+    public ResponseEntity<CartDto> getCart(@AuthenticationPrincipal UserDetails principal) {
         UUID profileId = UUID.fromString(principal.getUsername());
         return ResponseEntity.ok(profileService.getCart(profileId));
     }
 
     @PreAuthorize("hasAnyAuthority('CLIENT', 'ADMIN')")
     @GetMapping("orders")
-    public ResponseEntity<List<OrderDto>> getOrders(@AuthenticationPrincipal UserDetails principal){
+    public ResponseEntity<List<OrderDto>> getOrders(@AuthenticationPrincipal UserDetails principal) {
         UUID profileId = UUID.fromString(principal.getUsername());
         return ResponseEntity.ok(profileService.getOrders(profileId));
     }
@@ -48,31 +48,30 @@ public class ProfileController {
     @PutMapping
     public ResponseEntity<ReadProfileDto> updateProfileInfo(
             @RequestBody @Validated UpdateProfileDto profileDto,
-            @AuthenticationPrincipal UserDetails principal){
+            @AuthenticationPrincipal UserDetails principal) {
         UUID profileId = UUID.fromString(principal.getUsername());
         profileDto.setId(profileId);
         return ResponseEntity.ok(profileService.updateProfile(profileDto));
     }
 
 
-
     @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping
-    public ResponseEntity<?> deleteProfile(@RequestBody UUID profileId){
+    public ResponseEntity<?> deleteProfile(@RequestBody UUID profileId) {
         profileService.deleteProfile(profileId);
         return ResponseEntity.noContent().build();
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<ReadProfileDto> updateProfileRole(@PathVariable UUID id, @RequestBody Role role){
+    public ResponseEntity<ReadProfileDto> updateProfileRole(@PathVariable UUID id, @RequestBody Role role) {
         ReadProfileDto profileDto = profileService.updateProfileRole(id, role);
         return ResponseEntity.ok(profileDto);
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("all")
-    public ResponseEntity<List<ReadProfileDto>> getAllProfiles(){
+    public ResponseEntity<List<ReadProfileDto>> getAllProfiles() {
         return ResponseEntity.ok(
                 profileService.getAllProfiles()
         );
@@ -80,7 +79,7 @@ public class ProfileController {
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/{profileId}")
-    public ResponseEntity<ReadProfileDto> getProfileById(@PathVariable UUID profileId){
+    public ResponseEntity<ReadProfileDto> getProfileById(@PathVariable UUID profileId) {
         return ResponseEntity.ok(
                 profileService.getProfileById(profileId)
         );

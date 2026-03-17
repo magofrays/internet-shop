@@ -1,10 +1,8 @@
 package by.magofrays.shop.dto;
 
-import by.magofrays.shop.entity.CartItem;
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 

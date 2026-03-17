@@ -1,15 +1,9 @@
 package by.magofrays.shop.dto;
 
-import by.magofrays.shop.entity.Item;
-import by.magofrays.shop.entity.Order;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;

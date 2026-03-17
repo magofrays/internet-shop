@@ -1,7 +1,5 @@
 package by.magofrays.shop.dto;
 
-import by.magofrays.shop.entity.Cart;
-import by.magofrays.shop.entity.Item;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

@@ -3,17 +3,13 @@ package by.magofrays.shop.service;
 import by.magofrays.shop.dto.OrderDto;
 import by.magofrays.shop.entity.OrderReceipt;
 import by.magofrays.shop.repository.OrderReceiptRepository;
-import com.lowagie.text.pdf.BaseFont;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.thymeleaf.ITemplateEngine;
-import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
-import org.thymeleaf.spring5.SpringTemplateEngine;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 
 import java.io.ByteArrayOutputStream;

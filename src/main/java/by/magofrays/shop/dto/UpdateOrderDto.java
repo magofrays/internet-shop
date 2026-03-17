@@ -1,6 +1,5 @@
 package by.magofrays.shop.dto;
 
-import by.magofrays.shop.entity.OrderStatus;
 import lombok.Builder;
 import lombok.Data;
 

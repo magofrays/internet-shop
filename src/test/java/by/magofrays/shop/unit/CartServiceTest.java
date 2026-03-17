@@ -1,11 +1,7 @@
 package by.magofrays.shop.unit;
 
 import by.magofrays.shop.dto.CartItemDto;
-import by.magofrays.shop.dto.ItemDto;
-import by.magofrays.shop.entity.Cart;
 import by.magofrays.shop.entity.CartItem;
-import by.magofrays.shop.entity.Item;
-import by.magofrays.shop.entity.Profile;
 import by.magofrays.shop.exception.BusinessException;
 import by.magofrays.shop.mapper.CartItemMapperImpl;
 import by.magofrays.shop.mapper.ItemMapperImpl;
@@ -22,11 +18,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)

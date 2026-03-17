@@ -8,7 +8,6 @@ import by.magofrays.shop.entity.*;
 import by.magofrays.shop.exception.BusinessException;
 import by.magofrays.shop.mapper.OrderMapper;
 import by.magofrays.shop.repository.*;
-import liquibase.pro.packaged.R;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -18,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.mail.MessagingException;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.time.Instant;
 import java.util.*;
 

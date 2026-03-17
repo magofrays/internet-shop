@@ -27,7 +27,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
@@ -48,7 +47,7 @@ public class ItemServiceTest {
     @Autowired
     private ItemService itemService;
 
-    String imageUrl = "/tmp/upload/images/items/item-" + System.currentTimeMillis() + ".jpg";
+    final String imageUrl = "/tmp/upload/images/items/item-" + System.currentTimeMillis() + ".jpg";
     private UUID existingItemId;
     private Item existingItem;
     private ItemDto updateItemDto;

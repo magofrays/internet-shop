@@ -1,4 +1,5 @@
 package by.magofrays.shop.configuration.security;
+
 import by.magofrays.shop.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -10,7 +11,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -34,9 +34,9 @@ public class SecurityConfiguration {
                 .sessionManagement(
                         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(
-                auth ->
-                        auth.anyRequest().permitAll()
-        )
+                        auth ->
+                                auth.anyRequest().permitAll()
+                )
                 .formLogin().disable();
 
         return http.build();
@@ -44,7 +44,7 @@ public class SecurityConfiguration {
 
     @Bean
     @SneakyThrows
-    public AuthenticationManager authenticationManager(HttpSecurity http){
+    public AuthenticationManager authenticationManager(HttpSecurity http) {
         AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
         builder.userDetailsService(authService)
                 .passwordEncoder(passwordEncoder);

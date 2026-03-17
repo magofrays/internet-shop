@@ -1,7 +1,6 @@
 package by.magofrays.shop.controller;
 
 import by.magofrays.shop.dto.ItemDto;
-import by.magofrays.shop.entity.Item;
 import by.magofrays.shop.service.ItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -26,7 +25,7 @@ public class ItemController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ItemDto> createItem(
             @RequestPart("item") @Validated ItemDto itemDto,
-            @RequestParam(value = "image", required = false) MultipartFile image){
+            @RequestParam(value = "image", required = false) MultipartFile image) {
         return ResponseEntity.ok(itemService.createItem(itemDto, image));
     }
 
@@ -34,21 +33,21 @@ public class ItemController {
     @PostMapping("/image")
     public ResponseEntity<?> setImageForItem(
             @RequestPart("item") UUID itemId,
-            @RequestParam("image") MultipartFile image){
+            @RequestParam("image") MultipartFile image) {
         itemService.setImageForItemId(itemId, image);
         return ResponseEntity.ok().build();
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/image")
-    public ResponseEntity<?> deleteItemImage(@RequestBody UUID itemId){
+    public ResponseEntity<?> deleteItemImage(@RequestBody UUID itemId) {
         itemService.deleteItemImage(itemId);
         return ResponseEntity.noContent().build();
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping
-    public ResponseEntity<?> deleteItem(@RequestBody UUID itemId){
+    public ResponseEntity<?> deleteItem(@RequestBody UUID itemId) {
         itemService.deleteItem(itemId);
         return ResponseEntity.noContent().build();
     }
@@ -58,26 +57,26 @@ public class ItemController {
     public ResponseEntity<ItemDto> updateItem(
             @RequestPart("item") ItemDto itemDto,
             @RequestParam(value = "image", required = false) MultipartFile image
-    ){
+    ) {
         ItemDto result = itemService.updateItem(itemDto, image);
         return ResponseEntity.ok(result);
     }
 
     @GetMapping("/{itemId}")
-    public ResponseEntity<ItemDto> getItemById(@PathVariable UUID itemId){
+    public ResponseEntity<ItemDto> getItemById(@PathVariable UUID itemId) {
         ItemDto result = itemService.findById(itemId);
         return ResponseEntity.ok(result);
     }
 
     @GetMapping
-    public ResponseEntity<List<ItemDto>> getItems(){
+    public ResponseEntity<List<ItemDto>> getItems() {
         return ResponseEntity.ok(
                 itemService.getAllItems()
         );
     }
 
     @GetMapping("/image/{itemId}")
-    public ResponseEntity<Resource> getItemImage(@PathVariable UUID itemId){
+    public ResponseEntity<Resource> getItemImage(@PathVariable UUID itemId) {
         return ResponseEntity.ok(
                 itemService.getItemImage(itemId)
         );

@@ -158,7 +158,7 @@ public class FileStorageServiceTest {
                 return "test.txt";
             }
         };
-        String filename = file.getFilename();
+        file.getFilename();
         UUID entityId = UUID.randomUUID();
         String url = assertDoesNotThrow(() -> fileStorageService.saveFile(file, "db/test/test", entityId, null));
         Path saveDir = tempDir.resolve("save/");

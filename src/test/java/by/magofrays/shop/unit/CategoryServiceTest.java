@@ -23,7 +23,6 @@ import java.time.Instant;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
@@ -170,7 +169,7 @@ public class CategoryServiceTest {
 
         when(categoryRepository.findById(parentId)).thenReturn(Optional.empty());
 
-        BusinessException ex = assertThrows(BusinessException.class,
+        assertThrows(BusinessException.class,
                 () -> categoryService.createCatalogue(dto));
         verify(categoryRepository, never()).save(any());
     }
@@ -189,7 +188,7 @@ public class CategoryServiceTest {
 
         when(categoryRepository.findById(parentId)).thenReturn(Optional.of(parent));
 
-        BusinessException ex = assertThrows(BusinessException.class,
+        assertThrows(BusinessException.class,
                 () -> categoryService.createCatalogue(dto));
         verify(categoryRepository, never()).save(any());
     }
@@ -212,7 +211,7 @@ public class CategoryServiceTest {
         when(categoryRepository.findById(newParentId)).thenReturn(Optional.of(newParent));
         when(categoryRepository.save(any(Category.class))).thenReturn(category);
 
-        CategoryDto result = categoryService.updateCatalogue(dto);
+        categoryService.updateCatalogue(dto);
 
         assertEquals(dto.getTitle(), category.getTitle());
         assertEquals(dto.getDescription(), category.getDescription());
@@ -253,7 +252,7 @@ public class CategoryServiceTest {
 
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.empty());
 
-        BusinessException ex = assertThrows(BusinessException.class,
+        assertThrows(BusinessException.class,
                 () -> categoryService.updateCatalogue(dto));
     }
 
@@ -268,7 +267,7 @@ public class CategoryServiceTest {
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
         when(categoryRepository.findById(newParentId)).thenReturn(Optional.empty());
 
-        BusinessException ex = assertThrows(BusinessException.class,
+        assertThrows(BusinessException.class,
                 () -> categoryService.updateCatalogue(dto));
     }
 
@@ -305,7 +304,7 @@ public class CategoryServiceTest {
 
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
 
-        BusinessException ex = assertThrows(BusinessException.class,
+        assertThrows(BusinessException.class,
                 () -> categoryService.addItemIntoCatalogue(dto));
         verify(itemRepository, never()).findById(any());
     }
@@ -318,7 +317,7 @@ public class CategoryServiceTest {
 
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.empty());
 
-        BusinessException ex = assertThrows(BusinessException.class,
+        assertThrows(BusinessException.class,
                 () -> categoryService.addItemIntoCatalogue(dto));
     }
 
@@ -333,7 +332,7 @@ public class CategoryServiceTest {
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
         when(itemRepository.findById(itemId)).thenReturn(Optional.empty());
 
-        BusinessException ex = assertThrows(BusinessException.class,
+        assertThrows(BusinessException.class,
                 () -> categoryService.addItemIntoCatalogue(dto));
     }
 
@@ -371,7 +370,7 @@ public class CategoryServiceTest {
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
 
-        BusinessException ex = assertThrows(BusinessException.class,
+        assertThrows(BusinessException.class,
                 () -> categoryService.removeItemFromCatalogue(dto));
         verify(itemRepository, never()).save(any());
     }
@@ -384,7 +383,7 @@ public class CategoryServiceTest {
 
         when(itemRepository.findById(itemId)).thenReturn(Optional.empty());
 
-        BusinessException ex = assertThrows(BusinessException.class,
+        assertThrows(BusinessException.class,
                 () -> categoryService.removeItemFromCatalogue(dto));
     }
 
@@ -398,7 +397,7 @@ public class CategoryServiceTest {
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.empty());
 
-        BusinessException ex = assertThrows(BusinessException.class,
+        assertThrows(BusinessException.class,
                 () -> categoryService.removeItemFromCatalogue(dto));
     }
 
@@ -418,7 +417,7 @@ public class CategoryServiceTest {
     void getCatalogueTree_WhenCategoryNotFound_ShouldThrow() {
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.empty());
 
-        BusinessException ex = assertThrows(BusinessException.class,
+        assertThrows(BusinessException.class,
                 () -> categoryService.getCatalogueTree(categoryId));
     }
 
@@ -441,7 +440,7 @@ public class CategoryServiceTest {
     void getCategoriesByParentCategory_WhenParentNotFound_ShouldThrow() {
         when(categoryRepository.findById(parentId)).thenReturn(Optional.empty());
 
-        BusinessException ex = assertThrows(BusinessException.class,
+        assertThrows(BusinessException.class,
                 () -> categoryService.getCategoriesByParentCategory(parentId));
     }
 

@@ -1,11 +1,8 @@
 package by.magofrays.shop.dto;
 
-import by.magofrays.shop.entity.OrderItem;
 import by.magofrays.shop.entity.OrderStatus;
-import by.magofrays.shop.entity.Profile;
 import lombok.*;
 
-import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;

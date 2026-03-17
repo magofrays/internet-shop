@@ -11,9 +11,9 @@ import java.util.Arrays;
 import java.util.UUID;
 
 public class LocalStorageTest {
-    Instant createdAt = Instant.now();
-    public UUID profileId = UUID.randomUUID();
-    public Profile profile = Profile.builder()
+    final Instant createdAt = Instant.now();
+    public final UUID profileId = UUID.randomUUID();
+    public final Profile profile = Profile.builder()
             .id(profileId)
                 .email("test@email.com")
                 .firstName("Ivan")
@@ -22,7 +22,7 @@ public class LocalStorageTest {
                 .createdAt(createdAt)
                 .updatedAt(createdAt)
                 .build();
-    public ReadProfileDto profileDto = ReadProfileDto.builder()
+    public final ReadProfileDto profileDto = ReadProfileDto.builder()
             .id(profileId)
                 .email("test@email.com")
                 .firstName("Ivan")
@@ -33,7 +33,7 @@ public class LocalStorageTest {
                 .build();
 
 
-    public Item item1 = Item.builder()
+    public final Item item1 = Item.builder()
             .id(UUID.randomUUID())
             .title("Наушники GIGABYTE")
             .description("Крутые наушники за высокую цену")
@@ -42,7 +42,7 @@ public class LocalStorageTest {
             .price(new BigDecimal(10000))
             .build();
 
-    public Item item2 = Item.builder()
+    public final Item item2 = Item.builder()
             .id(UUID.randomUUID())
             .title("Очень длинный шнур для блока питания")
             .description("500 метров шнура хватит, чтобы подключить компьютер в тайге")
@@ -51,7 +51,7 @@ public class LocalStorageTest {
             .price(new BigDecimal(1000))
             .build();
 
-    public ItemDto itemDto1 = ItemDto.builder()
+    public final ItemDto itemDto1 = ItemDto.builder()
             .id(item1.getId())
             .title("Наушники GIGABYTE")
             .description("Крутые наушники за высокую цену")
@@ -60,7 +60,7 @@ public class LocalStorageTest {
             .price(new BigDecimal(10000))
             .build();
 
-    public ItemDto itemDto2 = ItemDto.builder()
+    public final ItemDto itemDto2 = ItemDto.builder()
             .id(item2.getId())
             .title("Очень длинный шнур для блока питания")
             .description("500 метров шнура хватит, чтобы подключить компьютер в тайге")
@@ -69,30 +69,30 @@ public class LocalStorageTest {
             .price(new BigDecimal(1000))
             .build();
 
-    public CartItem cartItem1 = CartItem.builder()
+    public final CartItem cartItem1 = CartItem.builder()
             .id(UUID.randomUUID())
             .item(item1)
                 .addedAt(Instant.now())
             .build();
 
-    public CartItem cartItem2 = CartItem.builder()
+    public final CartItem cartItem2 = CartItem.builder()
             .id(UUID.randomUUID())
             .item(item2)
                 .addedAt(Instant.now())
             .build();
 
-    public CartItemDto cartItemDto1 = CartItemDto.builder()
+    public final CartItemDto cartItemDto1 = CartItemDto.builder()
             .id(cartItem1.getId())
             .item(itemDto1)
             .addedAt(cartItem1.getAddedAt())
                 .build();
 
-    public CartItemDto cartItemDto2 = CartItemDto.builder()
+    public final CartItemDto cartItemDto2 = CartItemDto.builder()
             .id(cartItem2.getId())
             .item(itemDto2)
             .addedAt(cartItem2.getAddedAt())
                 .build();
-    public OrderItemDto orderItemDto1 = OrderItemDto.builder()
+    public final OrderItemDto orderItemDto1 = OrderItemDto.builder()
             .id(UUID.randomUUID())
             .item(itemDto1)
             .cost(new BigDecimal(10000))
@@ -100,7 +100,7 @@ public class LocalStorageTest {
             .createdAt(Instant.now())
             .build();
 
-    public OrderItemDto orderItemDto2 = OrderItemDto.builder()
+    public final OrderItemDto orderItemDto2 = OrderItemDto.builder()
             .id(UUID.randomUUID())
             .item(itemDto2)
             .cost(new BigDecimal(1000))
@@ -108,7 +108,7 @@ public class LocalStorageTest {
             .createdAt(Instant.now())
             .build();
 
-    public OrderItem orderItem1 = OrderItem.builder()
+    public final OrderItem orderItem1 = OrderItem.builder()
             .id(orderItemDto1.getId())
             .item(
             item1
@@ -118,7 +118,7 @@ public class LocalStorageTest {
             .createdAt(orderItemDto1.getCreatedAt())
             .build();
 
-    public OrderItem orderItem2 = OrderItem.builder()
+    public final OrderItem orderItem2 = OrderItem.builder()
             .id(orderItemDto2.getId())
             .item(
             item2
@@ -128,8 +128,8 @@ public class LocalStorageTest {
             .createdAt(orderItemDto2.getCreatedAt())
             .build();
 
-    public UUID orderId = UUID.randomUUID();
-    public OrderDto orderDto = OrderDto.builder()
+    public final UUID orderId = UUID.randomUUID();
+    public final OrderDto orderDto = OrderDto.builder()
             .id(orderId)
                 .totalCost(new BigDecimal(11000))
             .createdBy(profileDto)
@@ -142,7 +142,7 @@ public class LocalStorageTest {
                         .currency("RUB")
                 .orderStatus(OrderStatus.PENDING_PAYMENT)
                 .build();
-    public Cart cart = Cart.builder()
+    public final Cart cart = Cart.builder()
             .id(UUID.randomUUID())
             .profile(profile)
             .itemList(new ArrayList<>(Arrays.asList(
@@ -153,7 +153,7 @@ public class LocalStorageTest {
     {
         profile.setCart(cart);
     }
-    public CartDto cartDto = CartDto.builder()
+    public final CartDto cartDto = CartDto.builder()
             .id(cart.getId())
             .profileId(profileId)
             .itemList(Arrays.asList(
@@ -162,7 +162,7 @@ public class LocalStorageTest {
             ))
             .build();
 
-    public Order order = Order.builder()
+    public final Order order = Order.builder()
             .id(orderId)
             .createdBy(profile)
             .currency("RUB")
@@ -176,14 +176,14 @@ public class LocalStorageTest {
             .createdAt(orderDto.getCreatedAt())
             .updatedAt(orderDto.getUpdatedAt())
             .build();
-    public Category rootCategory = Category.builder()
+    public final Category rootCategory = Category.builder()
             .id(UUID.randomUUID())
             .title("Электротехника")
             .description("Бытовая техника и электроника")
             .createdAt(Instant.now().minus(1, ChronoUnit.DAYS))
             .updatedAt(Instant.now().minus(1, ChronoUnit.DAYS))
             .build();
-    public Category category1 = Category.builder()
+    public final Category category1 = Category.builder()
             .id(UUID.randomUUID())
             .title("Электроника")
             .parentCatalogue(rootCategory)
@@ -192,7 +192,7 @@ public class LocalStorageTest {
             .updatedAt(Instant.now().minus(1, ChronoUnit.DAYS))
             .build();
 
-    public Category categoryKid1 = Category.builder()
+    public final Category categoryKid1 = Category.builder()
             .id(UUID.randomUUID())
             .title("Компьютерная техника")
             .description("Аксессуары и компьютерная техника")
@@ -206,24 +206,24 @@ public class LocalStorageTest {
         rootCategory.getCategoryList().add(category1);
     }
 
-    public CategoryDto rootCategoryDto = CategoryDto.builder()
+    public final CategoryDto rootCategoryDto = CategoryDto.builder()
             .id(rootCategory.getId())
             .description(rootCategory.getDescription())
             .title(rootCategory.getTitle())
             .build();
 
-    public CategoryDto category1Dto = CategoryDto.builder()
+    public final CategoryDto category1Dto = CategoryDto.builder()
             .id(category1.getId())
             .title(category1.getTitle())
             .description(category1.getDescription())
             .build();
-    public CategoryDto categoryKid1Dto = CategoryDto.builder()
+    public final CategoryDto categoryKid1Dto = CategoryDto.builder()
             .id(categoryKid1.getId())
             .title(categoryKid1.getTitle())
             .description(categoryKid1.getDescription())
             .build();
 
-    public FullCategoryDto fullRootCategoryDto = FullCategoryDto.builder()
+    public final FullCategoryDto fullRootCategoryDto = FullCategoryDto.builder()
             .id(rootCategory.getId())
             .title(rootCategory.getTitle())
             .description(rootCategory.getDescription())
@@ -231,7 +231,7 @@ public class LocalStorageTest {
             .updatedAt(rootCategory.getUpdatedAt())
             .build();
 
-    public FullCategoryDto fullCategory1Dto = FullCategoryDto.builder()
+    public final FullCategoryDto fullCategory1Dto = FullCategoryDto.builder()
             .id(category1.getId())
             .title(category1.getTitle())
             .description(category1Dto.getDescription())
@@ -239,7 +239,7 @@ public class LocalStorageTest {
             .updatedAt(category1.getUpdatedAt())
             .build();
 
-    public FullCategoryDto fullCategoryKid1Dto = FullCategoryDto.builder()
+    public final FullCategoryDto fullCategoryKid1Dto = FullCategoryDto.builder()
             .id(categoryKid1.getId())
             .title(categoryKid1.getTitle())
             .description(categoryKid1.getDescription())

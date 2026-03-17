@@ -20,7 +20,7 @@ import java.util.Optional;
 public class JwtUtils {
     private final SecurityJwtProperties jwtProperties;
 
-    public String createJwt(UserDetails userDetails){
+    public String createJwt(UserDetails userDetails) {
         Key hmacKey = new SecretKeySpec(Base64.getDecoder().decode(jwtProperties.getSecret()),
                 SignatureAlgorithm.HS256.getJcaName());
         log.debug("Creating jwt token for {}", userDetails.getUsername());
@@ -34,7 +34,7 @@ public class JwtUtils {
                 .compact();
     }
 
-    public Optional<Jws<Claims>> parseToken(String jwt){
+    public Optional<Jws<Claims>> parseToken(String jwt) {
         try {
             Key hmacKey = new SecretKeySpec(
                     Base64.getDecoder().decode(jwtProperties.getSecret()),

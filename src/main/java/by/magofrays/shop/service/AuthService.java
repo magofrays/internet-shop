@@ -8,7 +8,6 @@ import by.magofrays.shop.entity.Profile;
 import by.magofrays.shop.entity.Role;
 import by.magofrays.shop.exception.BusinessException;
 import by.magofrays.shop.mapper.ProfileMapper;
-import by.magofrays.shop.repository.CartRepository;
 import by.magofrays.shop.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
