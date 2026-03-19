@@ -1,0 +1,71 @@
+spring:
+  application:
+    name: internet-shop
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/shop
+    username: shop
+    password: shop
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-timeout: 30000
+      maximum-pool-size: 20
+
+  servlet:
+    multipart:
+      location: /tmp
+      max-file-size: 5MB
+      max-request-size: 10MB
+
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate
+      naming:
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    default-schema: public
+    contexts: dev
+
+  mail:
+    host: localhost
+    port: 1025 # mailHog
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+      from-address: noreply@shop.ru
+
+receipt:
+  template: payment-receipt
+
+logging:
+  level:
+    root: INFO
+    org.springframework.security: DEBUG
+    by.magofrays: DEBUG
+
+file:
+  upload:
+    allowed-extensions: jpg,jpeg,png,gif,webp
+
+security:
+  jwt:
+    expires-hours: 10
+    secret: supersecretsossecretsecretsecretASAWQWASASFNANNnsnasnannwqw1214w
+
+server:
+  port: 8080
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true

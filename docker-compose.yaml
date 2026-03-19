@@ -1,0 +1,42 @@
+volumes:
+  postgres_data: {}
+
+services:
+  shop-db:
+    image: postgres:16-alpine
+    environment:
+      - 'POSTGRES_DB=shop'
+      - 'POSTGRES_PASSWORD=shop'
+      - 'POSTGRES_USER=shop'
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  shop-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: shop-backend:latest
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    ports:
+       - "8080:8080"
+    depends_on:
+      - shop-db
+
+  smtp:
+    image: boky/postfix
+    container_name: smtp-server
+    restart: unless-stopped
+    ports:
+      - "25:25"
+    environment:
+      - SMTP_SERVER_HOSTNAME=localhost
+      - SMTP_SERVER_DOMAIN=shop.ru
+      - RELAY_NETWORKS=0.0.0.0/0
+      - POSTFIX_mailbox_command=/bin/cat
+      - ALLOWED_SENDER_DOMAINS=shop.ru
+      - LOG_TO_STDOUT=1
+    hostname: mail
+

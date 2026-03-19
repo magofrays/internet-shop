@@ -1,0 +1,67 @@
+spring:
+  application:
+    name: internet-shop
+
+  datasource:
+    url: jdbc:h2:mem:testdb
+    username: shop
+    password: shop
+    driver-class-name: org.h2.Driver
+    hikari:
+      connection-timeout: 30000
+      maximum-pool-size: 20
+
+  servlet:
+    multipart:
+      location: /tmp
+      max-file-size: 5MB
+      max-request-size: 10MB
+
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+    hibernate:
+      ddl-auto: create-drop
+      naming:
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+    database-platform: org.hibernate.dialect.H2Dialect
+
+  liquibase:
+    enabled: false
+
+  mail:
+    host: localhost
+    port: 1025 # mailHog
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+      from-address: noreply@shop.ru
+
+receipt:
+  template: payment-receipt
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    by.magofrays: DEBUG
+
+file:
+  upload:
+    allowed-extensions: jpg,jpeg,png,gif,webp
+
+security:
+  jwt:
+    expires-hours: 10
+    secret: supersecretsossecretsecretsecretASAWQWASASFNANNnsnasnannwqw1214w
+
+server:
+  port: 8080
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
